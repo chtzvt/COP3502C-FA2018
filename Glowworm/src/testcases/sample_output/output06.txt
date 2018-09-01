@@ -1,0 +1,90 @@
+o-so-so-so-so-so-so-s
+
+Glowworm appears! Hooray!
+~OG
+=======
+
+Glowworm grows:
+~oOG
+=======
+
+Glowworm inches forward:
+ ~oOG
+=======
+
+Glowworm shrinks:
+ ~OG
+=======
+
+Glowworm grows:
+ ~oOG
+=======
+
+Glowworm inches forward:
+  ~oOG
+=======
+
+Glowworm shrinks:
+  ~OG
+=======
+
+Glowworm grows:
+  ~oOG
+=======
+
+Glowworm inches forward:
+   ~oOG
+=======
+
+Glowworm shrinks:
+   ~OG
+=======
+
+Glowworm grows:
+   ~oOG
+=======
+
+Glowworm inches forward:
+G   ~oO
+=======
+
+Glowworm shrinks:
+    ~OG
+=======
+
+Glowworm grows:
+G   ~oO
+=======
+
+Glowworm inches forward:
+OG   ~o
+=======
+
+Glowworm shrinks:
+G    ~O
+=======
+
+Glowworm grows:
+OG   ~o
+=======
+
+Glowworm inches forward:
+oOG   ~
+=======
+
+Glowworm shrinks:
+OG    ~
+=======
+
+Glowworm grows:
+oOG   ~
+=======
+
+Glowworm inches forward:
+~oOG
+=======
+
+Glowworm shrinks:
+~OG
+=======
+
