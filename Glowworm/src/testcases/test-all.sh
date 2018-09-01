@@ -172,7 +172,7 @@ run_test_case()
 	fi
 
 	# Run diff and capture its return value.
-	diff myoutput.txt sample_output/$output_file > /dev/null
+	diff myoutput.txt sample_output/$output_file >/dev/null  
 	diff_val=$?
 	
 	# Output results based on diff's return value.

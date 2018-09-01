@@ -3,14 +3,14 @@
 #include<stdlib.h>
 #include<strings.h>
 
+#include<stdint.h>
 typedef struct {
 	char isAlive;
-	int bodyLength;
-	int tailIndex;
-	int maxLength;
+	uint8_t bodyLength;
+	uint8_t tailIndex;
+	uint8_t maxLength;
 } glowworm;
 
-// Lots of helper functions!
 void appear(glowworm *worm, char *food);
 void print_worm(glowworm *worm);
 void print_platform(int len);
@@ -22,12 +22,11 @@ void kill(glowworm *worm);
 void chill(glowworm *worm);
 void print_usage(void);
 
+// You'll need to set this up to accept command line parameters.
 int main(int argc, char **argv)
 {
-	// My glowworm's name is Billy.
 	glowworm billy = {.isAlive = 1, .bodyLength = 1, .tailIndex = 1, .maxLength = 0};
 	
-	// Handle cases where too few arguments are provided
 	if(argc < 2){
 		print_usage();
 		return 1;
@@ -60,12 +59,7 @@ void print_worm(glowworm *worm){
 	if(headIndex > worm->maxLength)
 		headIndex -= worm->maxLength;
 
-	// Unlike most things in CS, Glowworm body parts are 1-indexed for clarity.
-	// I found that this makes some of the growing/shrinking logic somewhat easier
-	// to follow.
 	for(int i = 1; i < worm->maxLength + 1; i++) {
-		
-		// Print heads and tails
 		if(i == headIndex){
 			printf(worm->isAlive == 1 ? "G" : "x");
 			continue;
@@ -76,7 +70,6 @@ void print_worm(glowworm *worm){
 			continue;
 		}
 		
-		// Is the head in front of the tail?
 		if(headIndex > worm->tailIndex){
 			if(i > worm->tailIndex && i < headIndex){
 				if(i == headIndex - 1){
@@ -90,26 +83,19 @@ void print_worm(glowworm *worm){
 			}
 		}
 		
-		// Is the tail in front of the head? If so, Billy has wrapped- we'll need to
-		// take the laws of Translocational Worm Physics into account.
 		if(headIndex < worm->tailIndex){
-			// Is our cursor in front of the tail, but behind the head?
-			// If it is, we're in the body section and will have to print some segments.
 			if(i > worm->tailIndex || i < headIndex){
-				// The body segment closest to the head should be capitalized
 				if(i == headIndex - 1 || (i+1) - worm->maxLength == headIndex){
 					printf(worm->isAlive == 1 ? "O" : "X");
 				} else {
 					printf("o");
 				}
 			} else {
-				// Is our cursor outside of the worm? Cool- Print spaces if so.
 				printf(" ");
 			}
 		}
 		
 	}
-	
 	printf("\n");
 }
 
@@ -193,10 +179,12 @@ void print_usage(void){
 
 double difficultyRating(void)
 {
+	// Change this before submitting.
 	return 1.0;
 }
 
 double hoursSpent(void)
 {
+	// Change this before submitting.
 	return 2.0;
 }
