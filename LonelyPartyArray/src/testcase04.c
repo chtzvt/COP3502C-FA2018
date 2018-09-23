@@ -33,15 +33,17 @@ int main(void)
 	// Check whether the struct is set up correctly.
 	if (party == NULL)
 		failwhale("(Err1.01) NULL check failed.");
-	if (party->size != 1)
+	if (party->size != 1){
+		printf(">>>%d<<<", party->size);
 		failwhale("(Err1.02) party->size check failed.");
-	if (party->num_fragments != 3)
+	}if (party->num_fragments != 3)
 		failwhale("(Err1.03) party->num_fragments check failed.");
 	if (party->fragment_length != 12)
 		failwhale("(Err1.04) party->fragment_length check failed.");
-	if (party->num_active_fragments != 1)
+	if (party->num_active_fragments != 1){
+		printf(">>>%d<<<", party->num_active_fragments);
 		failwhale("(Err1.05) party->num_active_fragments check failed.");
-	if (party->fragments == NULL)
+	}if (party->fragments == NULL)
 		failwhale("(Err1.06) party->fragments check failed.");
 	if (party->fragment_sizes == NULL)
 		failwhale("(Err1.07) party->fragment_sizes check failed.");
@@ -90,8 +92,10 @@ int main(void)
 		failwhale("(Err3.03) party->num_fragments check failed.");
 	if (party->fragment_length != 12)
 		failwhale("(Err3.04) party->fragment_length check failed.");
-	if (party->num_active_fragments != 1)
+	if (party->num_active_fragments != 1){
+		printf(">>>%d<<<", party->num_active_fragments);
 		failwhale("(Err3.05) party->num_active_fragments check failed.");
+	}
 	if (party->fragments == NULL)
 		failwhale("(Err3.06) party->fragments check failed.");
 	if (party->fragment_sizes == NULL)
@@ -121,6 +125,7 @@ int main(void)
 			failwhale("(Err3.10b) party->fragment_sizes[1][i] check failed.");
 	}
 
+	printf("I'm here!!!_________________________________");
 	destroyLonelyPartyArray(party);
 
 	return 0;
