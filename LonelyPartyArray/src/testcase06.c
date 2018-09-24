@@ -180,8 +180,8 @@ printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
 		failwhale("(Err3.03) party->num_fragments check failed.");
 	if (party->fragment_length != 12)
 		failwhale("(Err3.04) party->fragment_length check failed.");
-//	if (party->num_active_fragments != 1)
-	//	failwhale("(Err3.05) party->num_active_fragments check failed."); //oOo
+	if (party->num_active_fragments != 1)
+		failwhale("(Err3.05) party->num_active_fragments check failed."); //oOo
 	if (party->fragments == NULL)
 		failwhale("(Err3.06) party->fragments check failed.");
 	if (party->fragment_sizes == NULL)
@@ -190,9 +190,7 @@ printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
 	for (i = 0; i < 3; i++)
 	{
 		if (i != 1 && party->fragments[i] != NULL)
-				printf("3.08a>>> %d:%d", i, *party->fragments[i]);
 			failwhale("(Err3.08a) party->fragments[i] check failed.");
-			
 		if (i == 1 && party->fragments[i] == NULL)
 			failwhale("(Err3.08b) party->fragments[i] check failed.");
 	}

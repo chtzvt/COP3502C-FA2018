@@ -19,36 +19,7 @@
 #include<stdlib.h>
 #include "LonelyPartyArray.h"
 
-
-/*
-typedef struct LonelyPartyArray
-{
-	int size;                  // number of occupied cells across all fragments
-	int num_fragments;         // number of fragments (arrays) in this struct
-	int fragment_length;       // number of cells per fragment
-	int num_active_fragments;  // number of allocated (non-NULL) fragments
-	int **fragments;           // array of pointers to individual fragments
-	int *fragment_sizes;       // stores number of used cells in each fragment
-} LonelyPartyArray;
-
-
-LonelyPartyArray *cloneLonelyPartyArray(LonelyPartyArray *party);  // optional (bonus)
-
-int get(LonelyPartyArray *party, int index);
-int delete(LonelyPartyArray *party, int index);
-int containsKey(LonelyPartyArray *party, int key);
-int isSet(LonelyPartyArray *party, int index);
-int printIfValid(LonelyPartyArray *party, int index);
-LonelyPartyArray *resetLonelyPartyArray(LonelyPartyArray *party);
-int getSize(LonelyPartyArray *party);
-int getCapacity(LonelyPartyArray *party);
-int getAllocatedCellCount(LonelyPartyArray *party);
-long long unsigned int getArraySizeInBytes(LonelyPartyArray *party);
-long long unsigned int getCurrentSizeInBytes(LonelyPartyArray *party);
-
-*/
-
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
   #define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__); fflush(stderr)
 #else
@@ -72,7 +43,6 @@ LonelyPartyArray *createLonelyPartyArray(int num_fragments, int fragment_length)
   
   if(num_fragments <= 0 || fragment_length <= 0){
     debugf("(createLonelyPartyArray) Terminated early: num_fragments[%d] or fragment_length[%d] were <= 0\n", num_fragments, fragment_length);
-    debugf("\n");
     return NULL;
   }
   
@@ -92,7 +62,6 @@ LonelyPartyArray *createLonelyPartyArray(int num_fragments, int fragment_length)
 
   if(LPA->fragments == NULL){
     debugf("(createLonelyPartyArray) Terminated early due to malloc failure! LPA->fragments is NULL\n");
-    debugf("\n");
     return NULL;
   }
   
@@ -143,7 +112,7 @@ LonelyPartyArray *destroyLonelyPartyArray(LonelyPartyArray *party)
 
 int set(LonelyPartyArray *party, int index, int key)
 {
-  int target_fragment, index_localized, was_empty = 0;
+  int fragment_index, index_localized, was_empty = 0;
   
   if(party == NULL){
     debugf("(set) Terminating early because LPA is NULL\n");
@@ -151,39 +120,37 @@ int set(LonelyPartyArray *party, int index, int key)
     return LPA_FAILURE;
   }
   
-  target_fragment = (index % party->fragment_length) - 1;
-  if(target_fragment < 0){
-    debugf("(set) Fragment index defaulted to 0\n");
-    target_fragment = 0;
-  }
-  debugf("(set) Computed index of target fragment %d from provided index of %d\n", target_fragment, index);
+  fragment_index = get_lpa_fragment_index(index, party);
+
+  debugf("(set) Computed index of target fragment %d from provided index of %d\n", fragment_index, index);
   
   if(index_is_valid(index, party) < 0){
     debugf("(set) Terminating early because index %d is invalid\n", index);
     debugf("\n");
+    printf("-> Bloop! Invalid access in set(). (index: %d, fragment: %d, offset: %d)\n", index, fragment_index, get_fragment_cell_index(index, party));
     return LPA_FAILURE;
   }
   
-  if(fragment_exists(target_fragment, party) < 0)
-    if(create_fragment(target_fragment, party) < 0){
-      debugf("(set) Terminating early because we FAILED to create a new fragment at LPA->fragments[%d] for the provided index %d\n", target_fragment, index);
+  if(fragment_exists(fragment_index, party) < 0)
+    if(create_fragment(fragment_index, party) < 0){
+      debugf("(set) Terminating early because we FAILED to create a new fragment at LPA->fragments[%d] for the provided index %d\n", fragment_index, index);
       debugf("\n");
       return LPA_FAILURE;
     }
   
   index_localized = index % party->fragment_length;
   
-  if(party->fragments[target_fragment][index_localized] == UNUSED)
+  if(party->fragments[fragment_index][index_localized] == UNUSED)
     was_empty = 1;
   else
-    debugf("(set) INFO: Cell %d in fragment %d was not empty when we were called\n", index_localized, target_fragment);
+    debugf("(set) INFO: Cell %d in fragment %d was not empty when we were called\n", index_localized, fragment_index);
     
-  debugf("(set) Storing value %d at index %d of fragment %d (index %d overall)...\n", key, index_localized, target_fragment, index);
-  party->fragments[target_fragment][index_localized] = key;
+  debugf("(set) Storing value %d at index %d of fragment %d (index %d overall)...\n", key, index_localized, fragment_index, index);
+  party->fragments[fragment_index][index_localized] = key;
   
   if(was_empty == 1){
-    party->fragment_sizes[target_fragment]++;
-    debugf("(set) Size of fragment %d updated to %d (from %d)\n", target_fragment, party->fragment_sizes[target_fragment], party->fragment_sizes[target_fragment]-1);
+    party->fragment_sizes[fragment_index]++;
+    debugf("(set) Size of fragment %d updated to %d (from %d)\n", fragment_index, party->fragment_sizes[fragment_index], party->fragment_sizes[fragment_index]-1);
     party->size++;
     debugf("(set) Overall LPA size updated to %d (from %d)\n", party->size, party->size-1);
   }
@@ -194,7 +161,7 @@ int set(LonelyPartyArray *party, int index, int key)
 
 int get(LonelyPartyArray *party, int index)
 {
-  int target_fragment, index_localized;
+  int fragment_index, index_localized;
   
   if(party == NULL){
     printf("-> Bloop! NULL pointer detected in get().\n");
@@ -203,19 +170,18 @@ int get(LonelyPartyArray *party, int index)
     return LPA_FAILURE;
   }
   
-  target_fragment = (index % party->fragment_length) - 1;
-  if(target_fragment < 0)
-    target_fragment = 0;
+  fragment_index = get_lpa_fragment_index(index, party);
     
-  debugf("(get) Computed index of target fragment %d from provided index of %d\n", target_fragment, index);
+  debugf("(get) Computed index of target fragment %d from provided index of %d\n", fragment_index, index);
   
   if(index_is_valid(index, party) < 0){
     debugf("(get) Terminating early because index %d is invalid\n", index);
     debugf("\n");
+    printf("-> Bloop! Invalid access in get(). (index: %d, fragment: %d, offset: %d)\n", index, fragment_index, get_fragment_cell_index(index, party));
     return LPA_FAILURE;
   }
 
-  if(fragment_exists(target_fragment, party) < 0){
+  if(fragment_exists(fragment_index, party) < 0){
     debugf("(get) Nothing exists at index %d\n", index);
     debugf("\n");
     return UNUSED;
@@ -223,7 +189,7 @@ int get(LonelyPartyArray *party, int index)
   
   index_localized = index % party->fragment_length;
   debugf("\n");
-  return party->fragments[target_fragment][index_localized];
+  return party->fragments[fragment_index][index_localized];
 }
 
 int index_is_valid(int index, LonelyPartyArray *party)
@@ -235,6 +201,87 @@ int index_is_valid(int index, LonelyPartyArray *party)
     debugf("\n");
     return -1;
   }
+}
+
+LonelyPartyArray *resetLonelyPartyArray(LonelyPartyArray *party)
+{
+  int i;
+  
+  if(party == NULL){
+    printf("-> Bloop! NULL pointer detected in resetLonelyPartyArray().\n");
+    return NULL;
+  }
+  
+  for(i = 0; i < party->num_active_fragments; i++){
+    if(party->fragment_sizes[i] > 0){
+      destroy_fragment(i, party);
+      party->fragment_sizes[i] = 0;
+    }
+  }
+  party->num_active_fragments = 0;
+  
+  printf("-> The LonelyPartyArray has returned to its nascent state. (capacity: %d, fragments: %d)\n", party->num_fragments * party->fragment_length, party->num_fragments);
+  return party;
+}
+
+int isSet(LonelyPartyArray *party, int index)
+{
+  int val = get(party, index);
+  
+  if(party != NULL && val != LPA_FAILURE && val != UNUSED)
+    return 1;
+  else
+    return 0;
+}
+
+int printIfValid(LonelyPartyArray *party, int index)
+{
+  
+  if(isSet(party, index) == 0)
+    return LPA_FAILURE;
+    
+  printf("%d\n", get(party, index));
+  return LPA_SUCCESS;
+}
+
+int getSize(LonelyPartyArray *party)
+{
+  return (party != NULL) ? party->size : -1;
+}
+
+int getCapacity(LonelyPartyArray *party)
+{
+  if(party != NULL)
+    return party->num_fragments * party->fragment_length;
+  else
+    return -1;
+}
+
+int getAllocatedCellCount(LonelyPartyArray *party)
+{
+  if(party != NULL)
+    return party->num_active_fragments * party->fragment_length;
+  else
+    return -1;
+}
+
+long long unsigned int getArraySizeInBytes(LonelyPartyArray *party)
+{
+  if(party != NULL)
+    return getCapacity(party) * sizeof(int);
+  else
+    return 0;
+}
+
+long long unsigned int getCurrentSizeInBytes(LonelyPartyArray *party){
+  if(party != NULL)
+    return sizeof(LonelyPartyArray*)
+    + sizeof(party)
+    + sizeof(party->fragments)
+    + sizeof(party->fragment_sizes)
+    + (sizeof(int) * getAllocatedCellCount(party));
+  else
+    return 0;
 }
 
 int delete(LonelyPartyArray *party, int index)
@@ -261,6 +308,7 @@ int delete(LonelyPartyArray *party, int index)
   if(fragment_exists(fragment_index, party) < 0){
     debugf("(delete) Nothing exists at index %d\n", index);
     debugf("\n");
+    printf("-> Bloop! Invalid access in delete(). (index: %d, fragment: %d, offset: %d)\n", fragment_index, party->fragment_sizes[fragment_index], get_fragment_cell_index(index, party));
     return LPA_FAILURE;
   }
   
@@ -286,6 +334,7 @@ int delete(LonelyPartyArray *party, int index)
   if(party->fragment_sizes[fragment_index] <= 0){
     debugf("(delete) Fragment %d emptied and marked for destruction\n", fragment_index);
     destroy_fragment(fragment_index, party);
+    printf("-> Deallocated fragment %d. (capacity: %d, indices: %d..%d)\n", fragment_index, party->fragment_sizes[fragment_index], (party->fragment_length * (fragment_index+1)), (party->fragment_length * (fragment_index+1)-1));
   }
   
   debugf("\n");
@@ -302,8 +351,8 @@ int destroy_fragment(int fragment_index, LonelyPartyArray *party)
     return -1;
   }
   
-  debugf("(destroy_fragment) \tFreeing members of LPA->fragments[%d]\n", fragment_index);
-  for(j = 0; j < party->fragment_sizes[fragment_index]; j++){
+  debugf("(destroy_fragment) \tFreeing %d members of LPA->fragments[%d]\n", party->fragment_sizes[fragment_index], fragment_index);
+  for(j = 0; j < party->fragment_sizes[fragment_index] - 1; j++){
       debugf("(destroy_fragment) \t\tFreeing member %d of LPA->fragments[%d] at address %p\n", j, fragment_index, &(party->fragments[fragment_index][j]));
       free(&(party->fragments[fragment_index][j]));
   }
@@ -322,9 +371,9 @@ int get_fragment_cell_index(int index, LonelyPartyArray *party){
 }
 
 int get_lpa_fragment_index(int index, LonelyPartyArray *party){
-  int target_fragment = (index % party->fragment_length) - 1;
-  if(target_fragment < 0)
-    target_fragment = 0;
+  int target_fragment = index / (party->fragment_length);
+  
+  debugf("(get_lpa_fragment_index) Matched provided index %d to container fragment %d\n", index, target_fragment);
   
   return target_fragment;
 }
@@ -358,6 +407,7 @@ int create_fragment(int fragment_index, LonelyPartyArray *party)
     party->fragments[fragment_index][i] = UNUSED;
   
   party->num_active_fragments++;
+  printf("-> Spawned fragment %d. (capacity: %d, indices: %d..%d)\n", fragment_index, party->fragment_length, (party->fragment_length * (fragment_index+1)), (party->fragment_length * (fragment_index+1)-1));
   debugf("(create_fragment) Active fragment counter updated to %d (from %d)\n", party->num_active_fragments, party->num_active_fragments-1);
   
   debugf("\n");
