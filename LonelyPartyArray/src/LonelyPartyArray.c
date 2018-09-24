@@ -31,10 +31,9 @@ typedef struct LonelyPartyArray
 	int *fragment_sizes;       // stores number of used cells in each fragment
 } LonelyPartyArray;
 
--LonelyPartyArray *createLonelyPartyArray(int num_fragments, int fragment_length);
--LonelyPartyArray *destroyLonelyPartyArray(LonelyPartyArray *party);
+
 LonelyPartyArray *cloneLonelyPartyArray(LonelyPartyArray *party);  // optional (bonus)
--int set(LonelyPartyArray *party, int index, int key);
+
 int get(LonelyPartyArray *party, int index);
 int delete(LonelyPartyArray *party, int index);
 int containsKey(LonelyPartyArray *party, int key);
@@ -60,6 +59,8 @@ int index_is_valid(int index, LonelyPartyArray *party);
 int index_exists(int index, LonelyPartyArray *party);
 int create_fragment(int fragment_index, LonelyPartyArray *party);
 int fragment_exists(int index, LonelyPartyArray *party);
+int get_lpa_fragment_index(int index, LonelyPartyArray *party);
+int get_fragment_cell_index(int index, LonelyPartyArray *party);
 
 LonelyPartyArray *createLonelyPartyArray(int num_fragments, int fragment_length)
 {
@@ -143,7 +144,8 @@ LonelyPartyArray *destroyLonelyPartyArray(LonelyPartyArray *party)
   return NULL;
 }
 
-int set(LonelyPartyArray *party, int index, int key){
+int set(LonelyPartyArray *party, int index, int key)
+{
   int target_fragment, index_localized, was_empty = 0;
   
   if(party == NULL){
@@ -188,7 +190,38 @@ int set(LonelyPartyArray *party, int index, int key){
   return LPA_SUCCESS;
 }
 
-int index_is_valid(int index, LonelyPartyArray *party){
+int get(LonelyPartyArray *party, int index)
+{
+  int target_fragment, index_localized;
+  
+  if(party == NULL){
+    printf("-> Bloop! NULL pointer detected in get().\n");
+    debugf("(set) Terminating early because LPA is NULL\n");
+    return LPA_FAILURE;
+  }
+  
+  target_fragment = (index % party->fragment_length) - 1;
+  if(target_fragment < 0)
+    target_fragment = 0;
+    
+  debugf("(get) Computed index of target fragment %d from provided index of %d\n", target_fragment, index);
+  
+  if(index_is_valid(index, party) < 0){
+    debugf("(get) Terminating early because index %d is invalid\n", index);
+    return LPA_FAILURE;
+  }
+
+  if(fragment_exists(target_fragment, party) < 0){
+    debugf("(get) Nothing exists at index %d\n", index);
+    return UNUSED;
+  }
+  
+  index_localized = index % party->fragment_length;
+  return party->fragments[target_fragment][index_localized];
+}
+
+int index_is_valid(int index, LonelyPartyArray *party)
+{
   if(index >= 0 && index <= (party->num_fragments * party->fragment_length - 1)){
     return 0;
   } else {
@@ -197,8 +230,69 @@ int index_is_valid(int index, LonelyPartyArray *party){
   }
 }
 
-int fragment_exists(int fragment_index, LonelyPartyArray *party){
+int delete(LonelyPartyArray *party, int index)
+{
+  int fragment_index, index_localized;
+  
+  if(party == NULL || index_is_valid(index, party) < 0)
+    return LPA_FAILURE;
+  
+  fragment_index = get_lpa_fragment_index(index, party);
+    
+  if(fragment_exists(fragment_index, party) < 0){
+    debugf("(delete) Nothing exists at index %d\n", index);
+    return LPA_FAILURE;
+  }
+  
+  index_localized = get_fragment_cell_index(index, party);
+  
+  if(party->fragments[fragment_index][index_localized] == UNUSED)
+    return LPA_FAILURE;
+
+  party->fragments[fragment_index][index_localized] = UNUSED;
+  party->size--;
+  
+  if(party->fragment_sizes[fragment_index] > 1)
+    party->fragment_sizes[fragment_index]--;
+  else
+    destroy_fragment(fragment_index, party);
+    
+  return LPA_SUCCESS;
+}
+
+int destroy_fragment(int fragment_index, LonelyPartyArray *party)
+{
+  int j;
+  
   if(party->fragments[fragment_index] == NULL){
+    debugf("(destroy_fragment) \tFragment at index %d is NULL (won't attempt to free() it)\n", fragment_index);
+    return -1;
+  }
+  
+  debugf("(destroyLonelyPartyArray) \tFreeing members of LPA->fragments[%d]\n", fragment_index);
+  for(j = 0; j < party->fragment_sizes[fragment_index]; j++){
+      debugf("(destroyLonelyPartyArray) \t\tFreeing member %d of LPA->fragments[%d] at address %p\n", j, fragment_index, &(party->fragments[fragment_index][j]));
+      free(&(party->fragments[fragment_index][j]));
+  }
+  
+  return 0;
+}
+
+int get_fragment_cell_index(int index, LonelyPartyArray *party){
+  return index % party->fragment_length;
+}
+
+int get_lpa_fragment_index(int index, LonelyPartyArray *party){
+  int target_fragment = (index % party->fragment_length) - 1;
+  if(target_fragment < 0)
+    target_fragment = 0;
+  
+  return target_fragment;
+}
+
+int fragment_exists(int fragment_index, LonelyPartyArray *party)
+{
+  if((fragment_index+1) > party->num_fragments || party->fragments[fragment_index] == NULL){
     debugf("(fragment_exists) INFO: fragment at index %d does not exist for LPA (but it may be created soon)\n", fragment_index);
     return -1;
   }
@@ -206,7 +300,8 @@ int fragment_exists(int fragment_index, LonelyPartyArray *party){
   return 0;
 }
 
-int create_fragment(int fragment_index, LonelyPartyArray *party){
+int create_fragment(int fragment_index, LonelyPartyArray *party)
+{
   int i;
   party->fragments[fragment_index] = malloc(sizeof(int) * party->fragment_length);
   debugf("(create_fragment) Allocated %d to LPA->fragments[%d] to store %d ints at address %p\n", (int)(sizeof(int) * party->fragment_length), fragment_index, party->fragment_length, party->fragments[fragment_index]);
