@@ -27,20 +27,10 @@ int main(void)
 	// Call set() twice on same index.
 	if (set(party, 14, 100) != LPA_SUCCESS)
 		failwhale("(Err0.01) set() check failed.");
-
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-
 	if (set(party, 14, 100) != LPA_SUCCESS)
 		failwhale("(Err0.02) set() check failed.");
-
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-
 	if (set(party, 14, 100) != LPA_SUCCESS)
 		failwhale("(Err0.03) set() check failed.");
-		
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-
-	printf(">>> Set of 14 here <<<\n");
 
 	// Check that the struct is set up correctly to begin with.
 	if (party == NULL)
@@ -86,10 +76,6 @@ printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
 	// attempting to delete a cell that is actually UNUSED.
 	if (delete(party, 15) != LPA_FAILURE)
 		failwhale("(Err2.01) delete() check failed.");
-	
-	printf(">>> ATTEMPTED DELETE of unused fragment here <<<\n");
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-		
 	if (party->size != 1)
 		failwhale("(Err2.02) party->size check failed.");
 	if (party->num_active_fragments != 1)
@@ -104,40 +90,16 @@ printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
 	// to be reduced many times, resulting in a fragment deallocation.
 	if (set(party, 13, 100) != LPA_SUCCESS)
 		failwhale("(Err2.06) set() check failed.");
-	
-	printf(">>> added 13 here <<<\n");
-
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-		
 	if (set(party, 15, 100) != LPA_SUCCESS)
 		failwhale("(Err2.07) set() check failed.");
-	
-	printf(">>> added 15 here <<<\n");
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-		
 	if (delete(party, 15) != LPA_SUCCESS)
 		failwhale("(Err2.08) delete() check failed.");
-	
-	printf(">>> first delete of 15 SHOULD SUCCEED <<<\n");
-	printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-	
 	if (delete(party, 15) != LPA_FAILURE)
 		failwhale("(Err2.09) delete() check failed.");
-	
-	printf(">>> second delete of 15 <<<\n");
-	printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-	
 	if (delete(party, 15) != LPA_FAILURE)
 		failwhale("(Err2.09) delete() check failed.");
-		
-	printf(">>> third delete of 15 <<<\n");
-	printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-
 	if (delete(party, 15) != LPA_FAILURE)
 		failwhale("(Err2.09) delete() check failed.");
-		
-	printf(">>> fourth delete of 15 <<<\n");
-	printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
 
 	// Also check that calling delete() on invalid indices produces the correct
 	// output and doesn't unsettle the struct's member values. These first two
@@ -145,29 +107,14 @@ printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
 	// are within bounds (even though they refer to UNUSED cells).
 	if (delete(party, 0) != LPA_FAILURE)
 		failwhale("(Err2.01) delete() check failed.");
-
-	printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-
 	if (delete(party, 35) != LPA_FAILURE)
 		failwhale("(Err2.02) delete() check failed.");
-	
-	printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-		
 	if (delete(party, 36) != LPA_FAILURE)
 		failwhale("(Err2.03) delete() check failed.");
-
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-	
 	if (delete(party, 48) != LPA_FAILURE)
 		failwhale("(Err2.04) delete() check failed.");
-
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-	
 	if (delete(party, 49) != LPA_FAILURE)
 		failwhale("(Err2.05) delete() check failed.");
-
-printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
-	
 	if (delete(party, 59) != LPA_FAILURE)
 		failwhale("(Err2.06) delete() check failed.");
 
@@ -181,7 +128,7 @@ printf(">>> NUM ACTIVE FRAGS: %d <<<\n", party->num_active_fragments);
 	if (party->fragment_length != 12)
 		failwhale("(Err3.04) party->fragment_length check failed.");
 	if (party->num_active_fragments != 1)
-		failwhale("(Err3.05) party->num_active_fragments check failed."); //oOo
+		failwhale("(Err3.05) party->num_active_fragments check failed.");
 	if (party->fragments == NULL)
 		failwhale("(Err3.06) party->fragments check failed.");
 	if (party->fragment_sizes == NULL)
