@@ -66,7 +66,7 @@ LonelyPartyArray *createLonelyPartyArray(int num_fragments, int fragment_length)
   int max_cap, i;
   LonelyPartyArray *LPA = malloc(sizeof(LonelyPartyArray));
   
-  debugf("(createLonelyPartyArray) Allocated space for LPA: %d\n", (int)sizeof(LonelyPartyArray));
+  debugf("(createLonelyPartyArray) Allocated space for LPA: %d at address %p\n", (int)sizeof(LonelyPartyArray), LPA);
   
   if(num_fragments <= 0 || fragment_length <= 0){
     debugf("(createLonelyPartyArray) Terminated early: num_fragments[%d] or fragment_length[%d] were <= 0\n", num_fragments, fragment_length);
@@ -82,10 +82,10 @@ LonelyPartyArray *createLonelyPartyArray(int num_fragments, int fragment_length)
   LPA->size = 0;
     
   LPA->fragments = malloc(sizeof(int *) * num_fragments);
-  debugf("(createLonelyPartyArray) Allocated %d to hold %d fragments in LPA->fragments\n", (int)(sizeof(int *) * num_fragments), num_fragments);
+  debugf("(createLonelyPartyArray) Allocated %d to hold %d fragments in LPA->fragments at address %p\n", (int)(sizeof(int *) * num_fragments), num_fragments, LPA->fragments);
   
   LPA->fragment_sizes = malloc(sizeof(int) * num_fragments);
-  debugf("(createLonelyPartyArray) Allocated %d to hold the sizes of %d fragments in LPA->fragment_sizes\n", (int)(sizeof(int) * num_fragments), num_fragments);
+  debugf("(createLonelyPartyArray) Allocated %d to hold the sizes of %d fragments in LPA->fragment_sizes at address %p\n", (int)(sizeof(int) * num_fragments), num_fragments, LPA->fragment_sizes);
 
   if(LPA->fragments == NULL){
     debugf("(createLonelyPartyArray) Terminated early due to malloc failure! LPA->fragments is NULL\n");
@@ -124,10 +124,16 @@ LonelyPartyArray *destroyLonelyPartyArray(LonelyPartyArray *party)
     
     debugf("(destroyLonelyPartyArray) \tFreeing members of LPA->fragments[%d]\n", i);
     for(j = 0; j < party->fragment_sizes[i]; j++){
-        debugf("(destroyLonelyPartyArray) \t\tFreeing member %d of LPA->fragments[%d]\n", j, i);
+        debugf("(destroyLonelyPartyArray) \t\tFreeing member %d of LPA->fragments[%d] at address %p\n", j, i, &(party->fragments[i][j]));
         free(&(party->fragments[i][j]));
     }
   }
+  
+  debugf("(destroyLonelyPartyArray) Freeing LPA fragment array at address %p\n", &(party->fragment_sizes[i]));
+  free(party->fragments);
+  
+  debugf("(destroyLonelyPartyArray) Freeing fragment size counter at address %p\n", &(party->fragment_sizes[i]));
+  free(party->fragment_sizes);
   
   debugf("(destroyLonelyPartyArray) Freeing LPA at address[%p]\n", party);
   free(party);
@@ -203,7 +209,7 @@ int fragment_exists(int fragment_index, LonelyPartyArray *party){
 int create_fragment(int fragment_index, LonelyPartyArray *party){
   int i;
   party->fragments[fragment_index] = malloc(sizeof(int) * party->fragment_length);
-  debugf("(create_fragment) Allocated %d to LPA->fragments[%d] to store %d ints\n", (int)(sizeof(int) * party->fragment_length), fragment_index, party->fragment_length);
+  debugf("(create_fragment) Allocated %d to LPA->fragments[%d] to store %d ints at address %p\n", (int)(sizeof(int) * party->fragment_length), fragment_index, party->fragment_length, party->fragments[fragment_index]);
   
   if(party->fragments[fragment_index] == NULL){
     debugf("(create_fragment) Terminating early because malloc() FAILED for fragment_index %d\n", fragment_index);
