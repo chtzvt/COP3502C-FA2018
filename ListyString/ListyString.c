@@ -147,8 +147,10 @@ char *listy_to_string(ListyString *list)
   char *str;
   int i;
   
-  if(list == NULL || list->head == NULL)
+  if(list == NULL || list->head == NULL){
+    debugf("(listy_to_string) ERROR: Terminating early due to NULL pointer!\n");
     return NULL;
+  }
   
   tmp = list->head;
   str = malloc(sizeof(char) * (list->length+1));
@@ -157,10 +159,13 @@ char *listy_to_string(ListyString *list)
     str[i] = tmp->data;
     tmp = tmp->next;
     
-    if(tmp == NULL)
+    if(tmp == NULL){
+      debugf("(listy_to_string) ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
       return NULL;
+    }
   }
   
+  // Terminate our character array with a null sentinel
   str[list->length] = '\0';
   
   return str;
