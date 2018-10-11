@@ -58,7 +58,7 @@ ListyString *createListyString(char *str)
 {
   ListyString *list;
   ListyNode *head, *prev_node, *tmp;
-  int raw_len = strlen(str);
+  int i, raw_len = strlen(str);
   
   // May want to double check on how to handle strlen of 0 here.
   if(raw_len < 0)
@@ -70,7 +70,7 @@ ListyString *createListyString(char *str)
   list->head = malloc(sizeof(ListyNode));
   head->data = str[0];
     
-  for(int i = 1; i < raw_len - 1; i++){
+  for(i = 1; i < raw_len - 1; i++){
     tmp = malloc(sizeof(ListyNode));
     
     tmp->data = str[i];
@@ -84,7 +84,25 @@ ListyString *createListyString(char *str)
 
 ListyString *destroyListyString(ListyString *listy)
 {
+  ListyNode *next_node, *tmp;
+  int i;
   
+  if(listy == NULL || listy->head == NULL)
+    return NULL;
+    
+  tmp = listy->head;
+    
+  for(i = 0; i < listy->length - 1; i++){
+    next_node = tmp->next;
+    
+    free(tmp);
+    
+    tmp = next_node;
+  }
+  
+  free(listy);
+  
+  return NULL;
 }
 
 ListyString *cloneListyString(ListyString *listy)
