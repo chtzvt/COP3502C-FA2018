@@ -138,7 +138,12 @@ int listyLength(ListyString *listy)
 
 void printListyString(ListyString *listy)
 {
+  if(listy == NULL){
+    printf("(empty string)\n");
+    debugf("(printListyString) INFO: Y'all passed me an empty string\n");
+  }
   
+  printf("%s\n", listy_to_string(listy));
 }
 
 char *listy_to_string(ListyString *list)
