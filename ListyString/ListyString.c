@@ -20,6 +20,7 @@
 
 
 void print_usage(char *name);
+char *listy_to_string(ListyString *list);
 
 int main(int argc, char **argv)
 {
@@ -138,6 +139,31 @@ int listyLength(ListyString *listy)
 void printListyString(ListyString *listy)
 {
   
+}
+
+char *listy_to_string(ListyString *list)
+{
+  ListyNode *tmp;
+  char *str;
+  int i;
+  
+  if(list == NULL || list->head == NULL)
+    return NULL;
+  
+  tmp = list->head;
+  str = malloc(sizeof(char) * (list->length+1));
+  
+  for(i = 0; i < list->length - 1; i++){
+    str[i] = tmp->data;
+    tmp = tmp->next;
+    
+    if(tmp == NULL)
+      return NULL;
+  }
+  
+  str[list->length] = '\0';
+  
+  return str;
 }
 
 void print_usage(char *name)
