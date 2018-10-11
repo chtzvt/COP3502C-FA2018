@@ -21,6 +21,7 @@
 
 void print_usage(char *name);
 char *listy_to_string(ListyString *list);
+ListyNode *get_listy_tail(ListyString *list);
 
 int main(int argc, char **argv)
 {
@@ -133,7 +134,12 @@ int listyCmp(ListyString *listy1, ListyString *listy2)
 
 int listyLength(ListyString *listy)
 {
+  if(listy == NULL){
+    debugf("(listyLength) INFO: Y'all passed me an empty string\n");
+    return -1;
+  }
   
+  return listy->length;
 }
 
 void printListyString(ListyString *listy)
@@ -160,6 +166,8 @@ char *listy_to_string(ListyString *list)
   tmp = list->head;
   str = malloc(sizeof(char) * (list->length+1));
   
+  // May need to implement proper bounds checking for the very last node,
+  // which will not have a next pointer.
   for(i = 0; i < list->length - 1; i++){
     str[i] = tmp->data;
     tmp = tmp->next;
@@ -175,6 +183,32 @@ char *listy_to_string(ListyString *list)
   
   return str;
 }
+
+ListyNode *get_listy_tail(ListyString *list)
+{
+  ListyNode *tmp;
+  int i;
+  
+  if(list == NULL || list->head == NULL){
+    debugf("(get_listy_tail) ERROR: Terminating early due to NULL pointer!\n");
+    return NULL;
+  }
+  
+  tmp = list->head;
+  
+  // Verify bounds checking here
+  for(i = 1; i < list->length - 1; i++){
+    tmp = tmp->next;
+    
+    if(tmp == NULL){
+      debugf("(get_listy_tail) ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
+      return NULL;
+    }
+  }
+  
+  return tmp;
+}
+
 
 void print_usage(char *name)
 {
