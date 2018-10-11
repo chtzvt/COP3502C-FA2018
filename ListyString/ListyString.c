@@ -109,7 +109,16 @@ ListyString *destroyListyString(ListyString *listy)
 
 ListyString *cloneListyString(ListyString *listy)
 {
+  char *listy_contents;
   
+  if(listy == NULL){
+    debugf("(cloneListyString) ERROR: Terminating early due to NULL pointer!\n");
+    return NULL;
+  }
+
+  listy_contents = listy_to_string(listy);
+
+  return createListyString(listy_contents);
 }
 
 void replaceChar(ListyString *listy, char key, char *str)
