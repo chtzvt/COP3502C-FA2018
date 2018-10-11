@@ -11,6 +11,14 @@
 #include <strings.h>
 #include "ListyString.h"
 
+//#define DEBUG
+#ifdef DEBUG
+  #define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__); fflush(stderr)
+#else
+  #define debugf(fmt, ...) ((void)0)
+#endif
+
+
 void print_usage(char *name);
 
 int main(int argc, char **argv)
@@ -53,7 +61,7 @@ ListyString *createListyString(char *str)
   int raw_len = strlen(str);
   
   // May want to double check on how to handle strlen of 0 here.
-  if(raw_len <= 0)
+  if(raw_len < 0)
     return NULL;
   
   list = malloc(sizeof(ListyString));
