@@ -18,7 +18,6 @@
   #define debugf(fmt, ...) ((void)0)
 #endif
 
-
 void print_usage(char *name);
 char *listy_to_string(ListyString *list);
 ListyNode *get_listy_tail(ListyString *list);
@@ -142,14 +141,23 @@ ListyString *listyCat(ListyString *listy, char *str)
   ListyNode *tail;
   
   if(listy == NULL && str == NULL)
+  {
+    debugf("(listyCat) [NULL] Called with NULL arguments\n");
     return NULL;
+  }
   
   if(listy == NULL && str != NULL)
+  {
+    debugf("(listyCat) [createListyString()] Called with NULL ListyString and non-NULL string\n");
     return createListyString(str);
-
+  }
+  
   if(str == NULL)
+  {
+    debugf("(listyCat) [ListyString] Called with non-NULL ListyString and NULL string\n");
     return listy;
-
+  }
+  
   tail = get_listy_tail(listy);
   str_len = strlen(str);
   
