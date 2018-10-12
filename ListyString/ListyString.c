@@ -26,7 +26,9 @@ ListyNode *get_listy_tail(ListyString *list);
 int main(int argc, char **argv)
 {
   // Handle cases where too few arguments are provided, so we don't segfault.
-	if(argc < 2 || argv[2] == NULL){
+	if (argc < 2 || argv[2] == NULL)
+  {
+    debugf("(main) Error: Invalid arguments\n");
 		print_usage(argv[0]);
 		return 1;
 	}
@@ -63,7 +65,7 @@ ListyString *createListyString(char *str)
   int i, raw_len = strlen(str);
   
   // May want to double check on how to handle strlen of 0 here.
-  if(raw_len < 0)
+  if (raw_len < 0)
     return NULL;
   
   list = malloc(sizeof(ListyString));
@@ -72,7 +74,8 @@ ListyString *createListyString(char *str)
   list->head = malloc(sizeof(ListyNode));
   head->data = str[0];
     
-  for(i = 1; i < raw_len - 1; i++){
+  for (i = 1; i < raw_len - 1; i++)
+  {
     tmp = malloc(sizeof(ListyNode));
     
     tmp->data = str[i];
@@ -89,12 +92,13 @@ ListyString *destroyListyString(ListyString *listy)
   ListyNode *next_node, *tmp;
   int i;
   
-  if(listy == NULL || listy->head == NULL)
+  if (listy == NULL || listy->head == NULL)
     return NULL;
     
   tmp = listy->head;
     
-  for(i = 0; i < listy->length - 1; i++){
+  for (i = 0; i < listy->length - 1; i++)
+  {
     next_node = tmp->next;
     
     free(tmp);
@@ -111,8 +115,9 @@ ListyString *cloneListyString(ListyString *listy)
 {
   char *listy_contents;
   
-  if(listy == NULL){
-    debugf("(cloneListyString) ERROR: Terminating early due to NULL pointer!\n");
+  if (listy == NULL)
+  {
+    debugf("(cloneListyString) [NULL] ERROR: Terminating early due to NULL pointer!\n");
     return NULL;
   }
 
@@ -134,17 +139,65 @@ void reverseListyString(ListyString *listy)
 ListyString *listyCat(ListyString *listy, char *str)
 {
   
+  
 }
 
 int listyCmp(ListyString *listy1, ListyString *listy2)
 {
+  int i;
+  ListyNode *l1_tmp, *l2_tmp;
   
+  // Two NULL pointers are considered equivalent
+  if (listy1 == NULL && listy2 == NULL)
+  {
+    debugf("(listyCmp) [0] INFO: Encountered two NULL ListyStrings\n");
+    return 0;
+  }
+  
+  // Perform checks specific to non-NULL listystrings
+  if (listy1 != NULL && listy2 != NULL)
+  {
+    // Two non-NULL listystrings with NULL head pointers are equivalent
+    if (listy1->head == NULL && listy2->head == NULL)
+    {
+      debugf("(listyCmp) [0] INFO: Encountered two non-NULL ListyStrings with NULL heads\n");
+      return 0;
+    }
+    
+    // Two non-NULL listystrings with unequal lengths must be non-equivalent
+    if(listy1->length != listy2->length)
+    {
+      debugf("(listyCmp) [-1] INFO: Encountered two non-NULL ListyStrings with unequal lengths\n");
+      return -1;
+    }
+  }
+  else
+  {
+    // A NULL listystring pointer is not equivalent to a non-NULL one
+    debugf("(listyCmp) [-1] INFO: Returning -1 \n");
+    return -1;
+  }
+
+  l1_tmp = listy1->head;
+  l2_tmp = listy2->head;
+
+  for (i = 0; i < listy1->length; i++)
+  {
+    if (l1_tmp->data != l2_tmp->data)
+      return -1;
+      
+    l1_tmp = l1_tmp->next;
+    l2_tmp = l2_tmp->next;
+  }
+  
+  return 0;
 }
 
 int listyLength(ListyString *listy)
 {
-  if(listy == NULL){
-    debugf("(listyLength) INFO: Y'all passed me an empty string\n");
+  if (listy == NULL)
+  {
+    debugf("(listyLength) [-1] INFO: Y'all passed me an empty string\n");
     return -1;
   }
   
@@ -153,7 +206,8 @@ int listyLength(ListyString *listy)
 
 void printListyString(ListyString *listy)
 {
-  if(listy == NULL){
+  if (listy == NULL)
+  {
     printf("(empty string)\n");
     debugf("(printListyString) INFO: Y'all passed me an empty string\n");
   }
@@ -167,8 +221,9 @@ char *listy_to_string(ListyString *list)
   char *str;
   int i;
   
-  if(list == NULL || list->head == NULL){
-    debugf("(listy_to_string) ERROR: Terminating early due to NULL pointer!\n");
+  if (list == NULL || list->head == NULL)
+  {
+    debugf("(listy_to_string) [NULL] ERROR: Terminating early due to NULL pointer!\n");
     return NULL;
   }
   
@@ -177,12 +232,14 @@ char *listy_to_string(ListyString *list)
   
   // May need to implement proper bounds checking for the very last node,
   // which will not have a next pointer.
-  for(i = 0; i < list->length - 1; i++){
+  for (i = 0; i < list->length - 1; i++)
+  {
     str[i] = tmp->data;
     tmp = tmp->next;
     
-    if(tmp == NULL){
-      debugf("(listy_to_string) ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
+    if (tmp == NULL)
+    {
+      debugf("(listy_to_string) [NULL] ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
       return NULL;
     }
   }
@@ -198,19 +255,22 @@ ListyNode *get_listy_tail(ListyString *list)
   ListyNode *tmp;
   int i;
   
-  if(list == NULL || list->head == NULL){
-    debugf("(get_listy_tail) ERROR: Terminating early due to NULL pointer!\n");
+  if (list == NULL || list->head == NULL)
+  {
+    debugf("(get_listy_tail) [NULL] ERROR: Terminating early due to NULL pointer!\n");
     return NULL;
   }
   
   tmp = list->head;
   
   // Verify bounds checking here
-  for(i = 1; i < list->length - 1; i++){
+  for (i = 1; i < list->length - 1; i++)
+  {
     tmp = tmp->next;
     
-    if(tmp == NULL){
-      debugf("(get_listy_tail) ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
+    if (tmp == NULL)
+    {
+      debugf("(get_listy_tail) [NULL] ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
       return NULL;
     }
   }
@@ -218,6 +278,36 @@ ListyNode *get_listy_tail(ListyString *list)
   return tmp;
 }
 
+ListyNode *find_listy_char(ListyString *list, char key)
+{
+  ListyNode *tmp;
+  int i;
+  
+  if (list == NULL || list->head == NULL)
+  {
+    debugf("(find_listy_char) [NULL] ERROR: Terminating early due to NULL pointer!\n");
+    return NULL;
+  }
+  
+  tmp = list->head;
+  
+  // Verify bounds checking here
+  for (i = 1; i < list->length - 1; i++)
+  {
+    if (tmp == NULL)
+    {
+      debugf("(get_listy_tail) [NULL] ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
+      return NULL;
+    }
+    
+    if (tmp->data == key)
+      return tmp;
+    
+    tmp = tmp->next;
+  }
+  
+  return NULL;
+}
 
 void print_usage(char *name)
 {
