@@ -138,8 +138,29 @@ void reverseListyString(ListyString *listy)
 
 ListyString *listyCat(ListyString *listy, char *str)
 {
+  int str_len, i;
+  ListyNode *tail;
   
+  if(listy == NULL && str == NULL)
+    return NULL;
   
+  if(listy == NULL && str != NULL)
+    return createListyString(str);
+
+  if(str == NULL)
+    return listy;
+
+  tail = get_listy_tail(listy);
+  str_len = strlen(str);
+  
+  for (i = 0; i < str_len; i++)
+  {
+    tail->next = malloc(sizeof(ListyNode));
+    tail->next->data = str[i];
+    tail = tail->next;
+  }
+  
+  return listy;
 }
 
 int listyCmp(ListyString *listy1, ListyString *listy2)
