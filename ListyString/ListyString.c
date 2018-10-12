@@ -142,6 +142,17 @@ void reverseListyString(ListyString *listy)
   
   for (i = 0; i < )
   
+  // (BAD) Get tail pointer
+  // (BAD) iterate from head to tail pointer
+  // (BAD) set tail->next to head->next ... the tail pointer
+  // (BAD) set list head to the tail pointer that was retrieved
+  // (BAD) You now have a reversed ListyString
+  
+  // Array of pointers as retrieved from linked list traversal
+  // Make tail of list the new head
+  // Iterate backwards through pointer array, and set next prop of each node
+  // The list has now been reversed in a memory efficient manner
+  
 }
 
 ListyString *listyCat(ListyString *listy, char *str)
