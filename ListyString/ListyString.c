@@ -132,6 +132,15 @@ void replaceChar(ListyString *listy, char key, char *str)
 
 void reverseListyString(ListyString *listy)
 {
+  int i;
+  
+  if(listy == NULL || listy->head == NULL)
+  {
+    debugf("(reverseListyString) [void] Called with NULL arguments\n");
+    return;
+  }
+  
+  for (i = 0; i < )
   
 }
 
