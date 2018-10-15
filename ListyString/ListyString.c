@@ -127,11 +127,12 @@ ListyString *cloneListyString(ListyString *listy)
 
 void replaceChar(ListyString *listy, char key, char *str)
 {
-  
+
 }
 
 void reverseListyString(ListyString *listy)
 {
+  ListyNode *next, *prev, *head;
   int i;
   
   if(listy == NULL || listy->head == NULL)
@@ -140,19 +141,27 @@ void reverseListyString(ListyString *listy)
     return;
   }
   
-  for (i = 0; i < )
+  prev = NULL;
+  head = listy->head;
+  next = listy->head->next;
   
-  // (BAD) Get tail pointer
-  // (BAD) iterate from head to tail pointer
-  // (BAD) set tail->next to head->next ... the tail pointer
-  // (BAD) set list head to the tail pointer that was retrieved
-  // (BAD) You now have a reversed ListyString
+  for (i = 0; i < listy->length; i++)
+  {
+    // Set head pointer's next member to the previous node
+    head->next = prev;
+    // The previous node we had processed is no longer the head
+    prev = head;
+    // The new next node will be the node after the next node we process
+    next = next->next;
+    
+    if (next == NULL)
+      break;
+    
+    // Move our head to the next node we should process
+    head = next;
+  }
   
-  // Array of pointers as retrieved from linked list traversal
-  // Make tail of list the new head
-  // Iterate backwards through pointer array, and set next prop of each node
-  // The list has now been reversed in a memory efficient manner
-  
+  listy->head = head;
 }
 
 ListyString *listyCat(ListyString *listy, char *str)
