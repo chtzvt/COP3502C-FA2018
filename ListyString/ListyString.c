@@ -195,6 +195,7 @@ void replaceChar(ListyString *listy, char key, char *str)
 
   for (i = 0; i < list_length; i++)
   {
+
     if (tmp_head->data == key){
       debugf("(replaceChar) Found key %c in string!\n", key);
       
@@ -247,7 +248,8 @@ void replaceChar(ListyString *listy, char key, char *str)
         if (tmp_prev == NULL && tmp_head->next != NULL)
         {
           debugf("(replaceChar) Connecting original HEAD node %c@%p to new HEAD %c@%p (case B)\n", listy->head->data, listy->head, tmp_string->head->data, tmp_string->head);
-          free(listy->head);
+        	free(listy->head);
+					tmp_string_tail->next = tmp_head->next;
           listy->head = tmp_string->head;
           tmp_head = tmp_string_tail;
         }
@@ -264,9 +266,9 @@ void replaceChar(ListyString *listy, char key, char *str)
         listy->length += (str_len - 1);
       }
     }
-    debugf("git llooooooo\n");
-    tmp_prev = tmp_head;
-    tmp_head = tmp_head->next;
+
+      tmp_prev = tmp_head;
+      tmp_head = tmp_head->next;
   }
 
   debugf("(replaceChar) --- exit\n");
