@@ -201,17 +201,31 @@ void replaceChar(ListyString *listy, char key, char *str)
       if (str_len == 0 || str == NULL)
       {
         debugf("(replaceChar) Provided string is NULL, so we'll delete this node\n");
-        if (tmp_prev != NULL)
+        debugf("(replaceChar) (tmp_prev == NULL): %d (tmp_head->next == NULL): %d \n", (tmp_prev == NULL), (tmp_head->next == NULL));
+        
+        if (tmp_prev != NULL && tmp_head->next != NULL)
         {
+          debugf("(replaceChar) Connecting node %c@%p to %c@%p (DELETE, case A)\n", tmp_prev->data, tmp_prev, tmp_head->next->data, tmp_head->next);
           tmp_prev->next = tmp_head->next;
+          free(tmp_head);
+          tmp_head = tmp_head->next;
         }
-        else if (tmp_head->next != NULL)
+        
+        if (tmp_prev == NULL && tmp_head->next != NULL)
         {
-          listy->head = tmp_head->next;
+          debugf("(replaceChar) Connecting original HEAD node %c@%p to new HEAD %c@%p (DELETE, case B)\n", listy->head->data, listy->head, tmp_head->data, tmp_head);
+          free(listy->head);
+          listy->head = tmp_head;
         }
-          
-        free(tmp_head);
-        tmp_head = tmp_prev->next;
+        
+        if (tmp_prev != NULL && tmp_head->next == NULL)
+        {
+          debugf("(replaceChar) Connecting node %c@%p to NULL to create a new end of our list (DELETE, case C)\n", tmp_prev->data, tmp_prev);
+          tmp_prev->next = NULL;
+          free(tmp_head);
+        }
+        
+        listy->length -= 1;
       }
       else
       {
@@ -250,7 +264,7 @@ void replaceChar(ListyString *listy, char key, char *str)
         listy->length += (str_len - 1);
       }
     }
-    
+    debugf("git llooooooo\n");
     tmp_prev = tmp_head;
     tmp_head = tmp_head->next;
   }
