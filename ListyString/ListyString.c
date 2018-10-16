@@ -11,7 +11,7 @@
 #include <strings.h>
 #include "ListyString.h"
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
   #define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__); fflush(stderr)
 #else
@@ -260,6 +260,7 @@ void replaceChar(ListyString *listy, char key, char *str)
           tmp_prev->next = tmp_string->head;
           free(tmp_head);
           tmp_head->next = tmp_string_tail;
+					tmp_string_tail->next = NULL;
         }
         
         listy->length += (str_len - 1);
@@ -420,7 +421,7 @@ int listyLength(ListyString *listy)
 void printListyString(ListyString *listy)
 {
   debugf("(printListyString) --- enter\n");
-  if (listy == NULL)
+  if (listy == NULL || listy->head == NULL || listy->length == 0)
   {
     printf("(empty string)\n");
     debugf("(printListyString) INFO: Y'all passed me an empty string\n");
@@ -452,7 +453,7 @@ char *listy_to_string(ListyString *list)
   
   // May need to implement proper bounds checking for the very last node,
   // which will not have a next pointer.
-  for (i = 0; i < list->length - 1; i++)
+  for (i = 0; i < list->length; i++)
   {
     str[i] = tmp->data;
     tmp = tmp->next;
@@ -461,7 +462,7 @@ char *listy_to_string(ListyString *list)
     {
       debugf("(listy_to_string) [NULL] ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
       debugf("(listy_to_string) --- exit\n");
-      return NULL;
+      break;
     }
   }
   
