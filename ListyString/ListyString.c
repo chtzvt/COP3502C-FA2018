@@ -220,7 +220,11 @@ void replaceChar(ListyString *listy, char key, char *str)
         debugf("(replaceChar) Now have a new ListyString of length %d, and its tail pointer: %p\n", tmp_string->length, tmp_string_tail);
 
         tmp_prev->next = tmp_string->head;
-        tmp_string_tail->next = tmp_head->next;
+        
+        if (tmp_head->next != NULL)
+          tmp_string_tail->next = tmp_head->next;
+        else
+          tmp_string_tail->next = NULL;
         
         free(tmp_head);
         tmp_head = tmp_string_tail->next;
@@ -229,12 +233,17 @@ void replaceChar(ListyString *listy, char key, char *str)
         debugf("(replaceChar) Temporary ListyString was free'd\n");
       }
     }
-      
-    tmp_prev = tmp_head;
-    tmp_head = tmp_head->next;
-    
-    if (tmp_head == NULL)
+        
+    if (tmp_head != NULL && tmp_head->next != NULL){
+      tmp_prev = tmp_head;
+      tmp_head = tmp_head->next;
+    }
+    else
+    {
       break;
+    }
+    
+    debugf("(replaceChar) TEMP HEAD: %p contains %c\n", tmp_head, tmp_head->data);
   }
   
   debugf("(replaceChar) --- exit\n");
