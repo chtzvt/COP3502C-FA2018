@@ -11,7 +11,7 @@
 #include <strings.h>
 #include "ListyString.h"
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
   #define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__); fflush(stderr)
 #else
@@ -22,10 +22,10 @@ void print_usage(char *name);
 char *listy_to_string(ListyString *list);
 ListyNode *get_listy_tail(ListyString *list);
 
-int main(int argc, char **argv)
+/*int main(int argc, char **argv)
 {
   // Handle cases where too few arguments are provided, so we don't segfault.
-	if (argc < 2 || argv[2] == NULL)
+	if (argc < 2 || argv[1] == NULL)
   {
     debugf("(main) Error: Invalid arguments\n");
 		print_usage(argv[0]);
@@ -33,26 +33,30 @@ int main(int argc, char **argv)
 	}
   
   return processInputFile(argv[1]);
-}
+}*/
 
 int processInputFile(char *filename)
 {
   FILE *ifp;
-  char *raw_string, *cmd;
+  char *raw_string = NULL, *cmd;
   int i;
   ListyString *listy;
   
   ifp = fopen(filename, "r");
   
-  if (ifp == NULL)
+  if (ifp == NULL){
+    debugf("(processInputFile) [1] Invalid filename provided.\n");
     return 1;
+  }
   
-  fscanf(temperatures, "%f", &currentTemp);
+  fscanf(ifp, "%s", raw_string);
   
   listy = createListyString(raw_string);
   
-  if (listy == NULL)
+  if (listy == NULL){
+    debugf("(processInputFile) [1] ListyString creation failed.\n");
     return 1;
+  }
   
   return 0;
 }
@@ -60,29 +64,43 @@ int processInputFile(char *filename)
 ListyString *createListyString(char *str)
 {
   ListyString *list;
-  ListyNode *head, *prev_node, *tmp;
-  int i, raw_len = strlen(str);
-  
-  // May want to double check on how to handle strlen of 0 here.
-  if (raw_len < 0)
-    return NULL;
+  ListyNode *prev_node, *tmp;
+  int i;
   
   list = malloc(sizeof(ListyString));
-  list->length = raw_len;
+  list->length = 0;
+  list->head = NULL;
+  debugf("(createListyString) malloc'd %d for a ListyString of length %d\n", (int)(sizeof(ListyString)), list->length);
   
-  list->head = malloc(sizeof(ListyNode));
-  head->data = str[0];
-    
-  for (i = 1; i < raw_len - 1; i++)
+  if (str == NULL){
+    debugf("(createListyString) [NULL] Recieved a NULL input string\n");
+    return list;
+  }
+  
+  list->length = strlen(str);
+  
+  // May want to double check on how to handle strlen of 0 here.
+  if (list->length < 1){
+    debugf("(createListyString) [NULL] Recieved an input string with a length of 0\n");
+    return list;
+  }
+
+  prev_node = malloc(sizeof(ListyNode));
+  list->head = prev_node;
+  list->head->data = str[0];
+  
+  for (i = 1; i < list->length; i++)
   {
     tmp = malloc(sizeof(ListyNode));
+    debugf("(createListyString) malloc'd %d for a ListyString node at index %d to hold %c\n", (int)(sizeof(ListyNode)), i, str[i]);
     
     tmp->data = str[i];
+    tmp->next = NULL;
     
     prev_node->next = tmp;
     prev_node = tmp;
   }
-  
+
   return list;
 }
 
@@ -127,6 +145,7 @@ ListyString *cloneListyString(ListyString *listy)
 
 void replaceChar(ListyString *listy, char key, char *str)
 {
+  int str_len;
   
   if(listy == NULL || listy->head == NULL)
   {
@@ -134,7 +153,7 @@ void replaceChar(ListyString *listy, char key, char *str)
     return;
   }
   
-  int str_len = strlen(str);
+  str_len = strlen(str);
 
 
 }
@@ -376,7 +395,7 @@ void print_usage(char *name)
 
 double difficultyRating(void)
 {
-  return 5.0;
+  return 4.0;
 }
 
 
