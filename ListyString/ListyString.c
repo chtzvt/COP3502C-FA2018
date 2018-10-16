@@ -178,7 +178,7 @@ void replaceChar(ListyString *listy, char key, char *str)
 {
   int str_len, i;
   ListyString *tmp_string;
-  ListyNode *tmp_head, *tmp_string_tail, *tmp_next, *tmp_prev;
+  ListyNode *tmp_head, *tmp_string_tail, *tmp_prev;
   
   debugf("(replaceChar) --- enter\n");
   if(listy == NULL || listy->head == NULL)
@@ -191,40 +191,50 @@ void replaceChar(ListyString *listy, char key, char *str)
   str_len = strlen(str);
   tmp_head = listy->head;
   tmp_prev = NULL;
-  tmp_next = tmp_head->next;
 
   for (i = 0; i < listy->length; i++)
   {
     if (tmp_head->data == key){
+      debugf("(replaceChar) Found key %c in string!\n", key);
+      
       if (str_len == 0 || str == NULL)
       {
+        debugf("(replaceChar) Provided string is NULL, so we'll delete this node\n");
         if (tmp_prev != NULL)
-          tmp_prev->next = tmp_next;
+        {
+          tmp_prev->next = tmp_head->next;
+        }
         else
-          listy->head = tmp_next;
+        {
+          listy->head = tmp_head->next;
+        }
           
         free(tmp_head);
+        tmp_head = tmp_prev->next;
       }
       else
       {
-        debugf("(replaceChar) Found key %c in string! Will now replace with %s\n", key, str);
+        debugf("(replaceChar) Will now replace %c with %s\n", key, str);
         tmp_string = createListyString(str);
         tmp_string_tail = get_listy_tail(tmp_string);
         debugf("(replaceChar) Now have a new ListyString of length %d, and its tail pointer: %p\n", tmp_string->length, tmp_string_tail);
+
+        tmp_prev->next = tmp_string->head;
+        tmp_string_tail->next = tmp_head->next;
         
-        tmp_head = tmp_string->head;
-        tmp_string_tail->next = tmp_next;
+        free(tmp_head);
+        tmp_head = tmp_string_tail->next;
         free(tmp_string);
+
         debugf("(replaceChar) Temporary ListyString was free'd\n");
       }
     }
-    
-    if (tmp_head->next == NULL)
-      break;
-    
+      
     tmp_prev = tmp_head;
     tmp_head = tmp_head->next;
-    tmp_next = tmp_head->next;
+    
+    if (tmp_head == NULL)
+      break;
   }
   
   debugf("(replaceChar) --- exit\n");
