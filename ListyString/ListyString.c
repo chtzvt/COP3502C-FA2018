@@ -258,7 +258,7 @@ void replaceChar(ListyString *listy, char key, char *str)
         {
           debugf("(replaceChar) Connecting node %c@%p to %c@%p (case C)\n", tmp_prev->data, tmp_prev, tmp_string_tail->data, tmp_string_tail);
           tmp_prev->next = tmp_string->head;
-          tmp_string_tail->next->next = NULL;
+          tmp_string_tail->next = NULL;
           free(tmp_head);
           tmp_head = tmp_string_tail;
         }
