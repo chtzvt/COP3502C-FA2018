@@ -176,7 +176,7 @@ ListyString *cloneListyString(ListyString *listy)
 
 void replaceChar(ListyString *listy, char key, char *str)
 {
-  int str_len, i;
+  int str_len, i, list_length;
   ListyString *tmp_string;
   ListyNode *tmp_head, *tmp_string_tail, *tmp_prev;
   
@@ -191,8 +191,9 @@ void replaceChar(ListyString *listy, char key, char *str)
   str_len = strlen(str);
   tmp_head = listy->head;
   tmp_prev = NULL;
+  list_length = listy->length;
 
-  for (i = 0; i < listy->length; i++)
+  for (i = 0; i < list_length; i++)
   {
     if (tmp_head->data == key){
       debugf("(replaceChar) Found key %c in string!\n", key);
@@ -204,7 +205,7 @@ void replaceChar(ListyString *listy, char key, char *str)
         {
           tmp_prev->next = tmp_head->next;
         }
-        else
+        else if (tmp_head->next != NULL)
         {
           listy->head = tmp_head->next;
         }
@@ -214,38 +215,46 @@ void replaceChar(ListyString *listy, char key, char *str)
       }
       else
       {
-        debugf("(replaceChar) Will now replace %c with %s\n", key, str);
+        debugf("(replaceChar) Will now replace '%c' with '%s'\n", key, str);
         tmp_string = createListyString(str);
         tmp_string_tail = get_listy_tail(tmp_string);
         debugf("(replaceChar) Now have a new ListyString of length %d, and its tail pointer: %p\n", tmp_string->length, tmp_string_tail);
-
-        tmp_prev->next = tmp_string->head;
+        debugf("(replaceChar) (tmp_prev == NULL): %d (tmp_head->next == NULL): %d \n", (tmp_prev == NULL), (tmp_head->next == NULL));
         
-        if (tmp_head->next != NULL)
+        if (tmp_prev != NULL && tmp_head->next != NULL)
+        {
+          debugf("(replaceChar) Connecting node %c@%p to %c@%p (case A)\n", tmp_prev->data, tmp_prev,  tmp_string->head->data, tmp_string->head);
+          tmp_prev->next = tmp_string->head;
           tmp_string_tail->next = tmp_head->next;
-        else
-          tmp_string_tail->next = NULL;
+          free(tmp_head);
+          tmp_head = tmp_string_tail;
+        }
         
-        free(tmp_head);
-        tmp_head = tmp_string_tail->next;
-        free(tmp_string);
-
-        debugf("(replaceChar) Temporary ListyString was free'd\n");
+        if (tmp_prev == NULL && tmp_head->next != NULL)
+        {
+          debugf("(replaceChar) Connecting original HEAD node %c@%p to new HEAD %c@%p (case B)\n", listy->head->data, listy->head, tmp_string->head->data, tmp_string->head);
+          free(listy->head);
+          listy->head = tmp_string->head;
+          tmp_head = tmp_string_tail;
+        }
+        
+        if (tmp_prev != NULL && tmp_head->next == NULL)
+        {
+          debugf("(replaceChar) Connecting node %c@%p to %c@%p (case C)\n", tmp_prev->data, tmp_prev, tmp_string_tail->data, tmp_string_tail);
+          tmp_prev->next = tmp_string->head;
+          tmp_string_tail->next->next = NULL;
+          free(tmp_head);
+          tmp_head = tmp_string_tail;
+        }
+        
+        listy->length += (str_len - 1);
       }
     }
-        
-    if (tmp_head != NULL && tmp_head->next != NULL){
-      tmp_prev = tmp_head;
-      tmp_head = tmp_head->next;
-    }
-    else
-    {
-      break;
-    }
     
-    debugf("(replaceChar) TEMP HEAD: %p contains %c\n", tmp_head, tmp_head->data);
+    tmp_prev = tmp_head;
+    tmp_head = tmp_head->next;
   }
-  
+
   debugf("(replaceChar) --- exit\n");
 }
 
