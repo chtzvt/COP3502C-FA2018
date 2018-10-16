@@ -73,7 +73,7 @@ ListyString *createListyString(char *str)
   debugf("(createListyString) malloc'd %d for a ListyString of length %d\n", (int)(sizeof(ListyString)), list->length);
   
   if (str == NULL){
-    debugf("(createListyString) [NULL] Recieved a NULL input string\n");
+    debugf("(createListyString) [empty list] Recieved a NULL input string\n");
     return list;
   }
   
@@ -81,7 +81,7 @@ ListyString *createListyString(char *str)
   
   // May want to double check on how to handle strlen of 0 here.
   if (list->length < 1){
-    debugf("(createListyString) [NULL] Recieved an input string with a length of 0\n");
+    debugf("(createListyString) [empty list] Recieved an input string with a length of 0\n");
     return list;
   }
 
@@ -101,6 +101,7 @@ ListyString *createListyString(char *str)
     prev_node = tmp;
   }
 
+  debugf("(createListyString) [new list] Triumphantly returning new ListyString of length %d\n", list->length);
   return list;
 }
 
