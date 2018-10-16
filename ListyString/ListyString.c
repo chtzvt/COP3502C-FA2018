@@ -44,7 +44,8 @@ int processInputFile(char *filename)
   
   ifp = fopen(filename, "r");
   
-  if (ifp == NULL){
+  if (ifp == NULL)
+  {
     debugf("(processInputFile) [1] Invalid filename provided.\n");
     return 1;
   }
@@ -53,7 +54,8 @@ int processInputFile(char *filename)
   
   listy = createListyString(raw_string);
   
-  if (listy == NULL){
+  if (listy == NULL)
+  {
     debugf("(processInputFile) [1] ListyString creation failed.\n");
     return 1;
   }
@@ -66,6 +68,8 @@ ListyString *createListyString(char *str)
   ListyString *list;
   ListyNode *prev_node, *tmp;
   int i;
+
+  debugf("(createListyString) --- enter\n");
   
   list = malloc(sizeof(ListyString));
   list->length = 0;
@@ -74,6 +78,7 @@ ListyString *createListyString(char *str)
   
   if (str == NULL){
     debugf("(createListyString) [empty list] Recieved a NULL input string\n");
+    debugf("(createListyString) --- exit\n");
     return list;
   }
   
@@ -82,12 +87,15 @@ ListyString *createListyString(char *str)
   // May want to double check on how to handle strlen of 0 here.
   if (list->length < 1){
     debugf("(createListyString) [empty list] Recieved an input string with a length of 0\n");
+    debugf("(createListyString) --- exit\n");
     return list;
   }
 
+  debugf("(createListyString) LENGTH UPDATE: Populating ListyString with %d nodes\n", list->length);
   prev_node = malloc(sizeof(ListyNode));
   list->head = prev_node;
   list->head->data = str[0];
+  debugf("(createListyString) malloc'd %d for the ListyString HEAD node at index %d to hold %c\n", (int)(sizeof(ListyNode)), 0, str[0]);
   
   for (i = 1; i < list->length; i++)
   {
@@ -102,6 +110,7 @@ ListyString *createListyString(char *str)
   }
 
   debugf("(createListyString) [new list] Triumphantly returning new ListyString of length %d\n", list->length);
+  debugf("(createListyString) --- exit\n");
   return list;
 }
 
@@ -110,9 +119,23 @@ ListyString *destroyListyString(ListyString *listy)
   ListyNode *next_node, *tmp;
   int i;
   
-  if (listy == NULL || listy->head == NULL)
+  debugf("(destroyListyString) --- enter\n");
+  
+  if (listy == NULL)
+  {
+    debugf("(destroyListyString) [NULL] Terminating early due to NULL arguments\n");
+    debugf("(destroyListyString) --- exit\n");
     return NULL;
-    
+  }
+
+ if (listy->head == NULL)
+ {
+   free(listy);
+   debugf("(destroyListyString) [NULL] Triumphantly returning NULL after successful destruction of an EMPTY listystring\n");
+   debugf("(destroyListyString) --- exit\n");
+   return NULL;
+ }
+
   tmp = listy->head;
     
   for (i = 0; i < listy->length - 1; i++)
@@ -126,6 +149,8 @@ ListyString *destroyListyString(ListyString *listy)
   
   free(listy);
   
+  debugf("(destroyListyString) [NULL] Triumphantly returning NULL after successful destruction of a listystring\n");
+  debugf("(destroyListyString) --- exit\n");
   return NULL;
 }
 
@@ -133,39 +158,87 @@ ListyString *cloneListyString(ListyString *listy)
 {
   char *listy_contents;
   
+  debugf("(cloneListyString) --- enter\n");
   if (listy == NULL)
   {
     debugf("(cloneListyString) [NULL] ERROR: Terminating early due to NULL pointer!\n");
+    debugf("(cloneListyString) --- exit\n");
     return NULL;
   }
 
   listy_contents = listy_to_string(listy);
+  debugf("(cloneListyString) Converted ListyString of length %d to a string of length %d\n", (int)listy->length, (int)strlen(listy_contents));
 
+  debugf("(cloneListyString) [new listy string] Triumphantly returning a new listy string.\n");
+  debugf("(cloneListyString) --- exit\n");
   return createListyString(listy_contents);
 }
 
 void replaceChar(ListyString *listy, char key, char *str)
 {
-  int str_len;
+  int str_len, i;
+  ListyString *tmp_string;
+  ListyNode *tmp_head, *tmp_string_tail, *tmp_next, *tmp_prev;
   
+  debugf("(replaceChar) --- enter\n");
   if(listy == NULL || listy->head == NULL)
   {
     debugf("(replaceChar) [void] Called with NULL arguments\n");
+    debugf("(replaceChar) --- exit\n");
     return;
   }
   
   str_len = strlen(str);
+  tmp_head = listy->head;
+  tmp_prev = NULL;
+  tmp_next = tmp_head->next;
 
-
+  for (i = 0; i < listy->length; i++)
+  {
+    if (tmp_head->data == key){
+      if (str_len == 0 || str == NULL)
+      {
+        if (tmp_prev != NULL)
+          tmp_prev->next = tmp_next;
+        else
+          listy->head = tmp_next;
+          
+        free(tmp_head);
+      }
+      else
+      {
+        debugf("(replaceChar) Found key %c in string! Will now replace with %s\n", key, str);
+        tmp_string = createListyString(str);
+        tmp_string_tail = get_listy_tail(tmp_string);
+        debugf("(replaceChar) Now have a new ListyString of length %d, and its tail pointer: %p\n", tmp_string->length, tmp_string_tail);
+        
+        tmp_head = tmp_string->head;
+        tmp_string_tail->next = tmp_next;
+        free(tmp_string);
+        debugf("(replaceChar) Temporary ListyString was free'd\n");
+      }
+    }
+    
+    if (tmp_head->next == NULL)
+      break;
+    
+    tmp_prev = tmp_head;
+    tmp_head = tmp_head->next;
+    tmp_next = tmp_head->next;
+  }
+  
+  debugf("(replaceChar) --- exit\n");
 }
 
 void reverseListyString(ListyString *listy)
 {
   ListyNode *next, *prev, *head;
   
+  debugf("(reverseListyString) --- enter\n");
   if(listy == NULL || listy->head == NULL)
   {
     debugf("(reverseListyString) [void] Called with NULL arguments\n");
+    debugf("(reverseListyString) --- exit\n");
     return;
   }
   
@@ -183,6 +256,7 @@ void reverseListyString(ListyString *listy)
   }
   
   listy->head = head;
+  debugf("(reverseListyString) --- exit\n");
 }
 
 ListyString *listyCat(ListyString *listy, char *str)
@@ -190,21 +264,25 @@ ListyString *listyCat(ListyString *listy, char *str)
   int str_len, i;
   ListyNode *tail;
   
+  debugf("(listyCat) --- enter\n");
   if(listy == NULL && str == NULL)
   {
     debugf("(listyCat) [NULL] Called with NULL arguments\n");
+    debugf("(listyCat) --- exit\n");
     return NULL;
   }
   
   if(listy == NULL && str != NULL)
   {
     debugf("(listyCat) [createListyString()] Called with NULL ListyString and non-NULL string\n");
+    debugf("(listyCat) --- exit\n");
     return createListyString(str);
   }
   
   if(str == NULL)
   {
     debugf("(listyCat) [ListyString] Called with non-NULL ListyString and NULL string\n");
+    debugf("(listyCat) --- exit\n");
     return listy;
   }
   
@@ -218,6 +296,8 @@ ListyString *listyCat(ListyString *listy, char *str)
     tail = tail->next;
   }
   
+  debugf("(listyCat) [ListyString] Triumphantly returning our concatenated ListyString\n");
+  debugf("(listyCat) --- exit\n");
   return listy;
 }
 
@@ -226,10 +306,13 @@ int listyCmp(ListyString *listy1, ListyString *listy2)
   int i;
   ListyNode *l1_tmp, *l2_tmp;
   
+  debugf("(listyCmp) --- enter\n");
+  
   // Two NULL pointers are considered equivalent
   if (listy1 == NULL && listy2 == NULL)
   {
     debugf("(listyCmp) [0] INFO: Encountered two NULL ListyStrings\n");
+    debugf("(listyCmp) --- exit\n");
     return 0;
   }
   
@@ -240,6 +323,7 @@ int listyCmp(ListyString *listy1, ListyString *listy2)
     if (listy1->head == NULL && listy2->head == NULL)
     {
       debugf("(listyCmp) [0] INFO: Encountered two non-NULL ListyStrings with NULL heads\n");
+      debugf("(listyCmp) --- exit\n");
       return 0;
     }
     
@@ -247,6 +331,7 @@ int listyCmp(ListyString *listy1, ListyString *listy2)
     if(listy1->length != listy2->length)
     {
       debugf("(listyCmp) [-1] INFO: Encountered two non-NULL ListyStrings with unequal lengths\n");
+      debugf("(listyCmp) --- exit\n");
       return -1;
     }
   }
@@ -254,6 +339,7 @@ int listyCmp(ListyString *listy1, ListyString *listy2)
   {
     // A NULL listystring pointer is not equivalent to a non-NULL one
     debugf("(listyCmp) [-1] INFO: Returning -1 \n");
+    debugf("(listyCmp) --- exit\n");
     return -1;
   }
 
@@ -269,29 +355,39 @@ int listyCmp(ListyString *listy1, ListyString *listy2)
     l2_tmp = l2_tmp->next;
   }
   
+  debugf("(listyCmp) [0] Triumphantly returning 0 for two equivalent ListyStrings\n");
+  debugf("(listyCmp) --- exit\n");
   return 0;
 }
 
 int listyLength(ListyString *listy)
 {
+  debugf("(listyLength) --- enter\n");
   if (listy == NULL)
   {
     debugf("(listyLength) [-1] INFO: Y'all passed me an empty string\n");
     return -1;
   }
   
+  debugf("(listyLength) [%d] Triumphantly returning ListyString length\n", listy->length);
+  debugf("(listyLength) --- exit\n");
   return listy->length;
 }
 
 void printListyString(ListyString *listy)
 {
+  debugf("(printListyString) --- enter\n");
   if (listy == NULL)
   {
     printf("(empty string)\n");
     debugf("(printListyString) INFO: Y'all passed me an empty string\n");
   }
+  else
+  {
+    printf("%s\n", listy_to_string(listy));
+  }
   
-  printf("%s\n", listy_to_string(listy));
+  debugf("(printListyString) --- exit\n");
 }
 
 char *listy_to_string(ListyString *list)
@@ -300,9 +396,11 @@ char *listy_to_string(ListyString *list)
   char *str;
   int i;
   
+  debugf("(listy_to_string) --- enter\n");
   if (list == NULL || list->head == NULL)
   {
     debugf("(listy_to_string) [NULL] ERROR: Terminating early due to NULL pointer!\n");
+    debugf("(listy_to_string) --- exit\n");
     return NULL;
   }
   
@@ -319,6 +417,7 @@ char *listy_to_string(ListyString *list)
     if (tmp == NULL)
     {
       debugf("(listy_to_string) [NULL] ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
+      debugf("(listy_to_string) --- exit\n");
       return NULL;
     }
   }
@@ -326,6 +425,8 @@ char *listy_to_string(ListyString *list)
   // Terminate our character array with a null sentinel
   str[list->length] = '\0';
   
+  debugf("(listy_to_string) [new string] Triumphantly returning a new string\n");
+  debugf("(listy_to_string) --- exit\n");
   return str;
 }
 
@@ -334,9 +435,11 @@ ListyNode *get_listy_tail(ListyString *list)
   ListyNode *tmp;
   int i;
   
+  debugf("(get_listy_tail) --- enter\n");
   if (list == NULL || list->head == NULL)
   {
     debugf("(get_listy_tail) [NULL] ERROR: Terminating early due to NULL pointer!\n");
+    debugf("(get_listy_tail) --- exit\n");
     return NULL;
   }
   
@@ -350,10 +453,13 @@ ListyNode *get_listy_tail(ListyString *list)
     if (tmp == NULL)
     {
       debugf("(get_listy_tail) [NULL] ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
+      debugf("(get_listy_tail) --- exit\n");
       return NULL;
     }
   }
   
+  debugf("(get_listy_tail) [%p] Triumphantly returning the address of a new ListyNode\n", tmp);
+  debugf("(get_listy_tail) --- exit\n");
   return tmp;
 }
 
@@ -362,9 +468,11 @@ ListyNode *find_listy_char(ListyString *list, char key)
   ListyNode *tmp;
   int i;
   
+  debugf("(find_listy_char) --- enter\n");
   if (list == NULL || list->head == NULL)
   {
-    debugf("(find_listy_char) [NULL] ERROR: Terminating early due to NULL pointer!\n");
+    debugf("(find_listy_char) [NULL] ERROR: Terminating early - malformed listy string or head is NULL\n");
+    debugf("(find_listy_char) --- exit\n");
     return NULL;
   }
   
@@ -375,16 +483,22 @@ ListyNode *find_listy_char(ListyString *list, char key)
   {
     if (tmp == NULL)
     {
-      debugf("(get_listy_tail) [NULL] ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
+      debugf("(find_listy_char) [NULL] Triumphantly returning NULL, no nodes found containing %c (hit NULL next pointer)\n", key);
+      debugf("(find_listy_char) --- exit\n");
       return NULL;
     }
     
     if (tmp->data == key)
+    {
+      debugf("(find_listy_char) [%p] Success! Triumphantly returning address of node containing %c\n", tmp, key);
+      debugf("(find_listy_char) --- exit\n");
       return tmp;
-    
+    }
     tmp = tmp->next;
   }
   
+  debugf("(find_listy_char) [NULL] Triumphantly returning NULL, no nodes found containing %c (hit end of list length)\n", key);
+  debugf("(find_listy_char) --- exit\n");
   return NULL;
 }
 
