@@ -127,13 +127,21 @@ ListyString *cloneListyString(ListyString *listy)
 
 void replaceChar(ListyString *listy, char key, char *str)
 {
+  
+  if(listy == NULL || listy->head == NULL)
+  {
+    debugf("(replaceChar) [void] Called with NULL arguments\n");
+    return;
+  }
+  
+  int str_len = strlen(str);
+
 
 }
 
 void reverseListyString(ListyString *listy)
 {
   ListyNode *next, *prev, *head;
-  int i;
   
   if(listy == NULL || listy->head == NULL)
   {
@@ -141,24 +149,17 @@ void reverseListyString(ListyString *listy)
     return;
   }
   
-  prev = NULL;
-  head = listy->head;
-  next = listy->head->next;
+  prev = listy->head;
+  prev->next = NULL;
+  head = listy->head->next;
+  next = head;
   
-  for (i = 0; i < listy->length; i++)
+  while (head != NULL)
   {
-    // Set head pointer's next member to the previous node
-    head->next = prev;
-    // The previous node we had processed is no longer the head
-    prev = head;
-    // The new next node will be the node after the next node we process
-    next = next->next;
-    
-    if (next == NULL)
-      break;
-    
-    // Move our head to the next node we should process
-    head = next;
+    head = head->next;
+    next->next = prev;
+    prev = next;
+    next = head;
   }
   
   listy->head = head;
