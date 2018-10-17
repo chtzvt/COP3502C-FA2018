@@ -276,7 +276,7 @@ void replaceChar(ListyString *listy, char key, char *str)
 
 void reverseListyString(ListyString *listy)
 {
-  ListyNode *next, *prev, *head;
+  ListyNode *next, *head, *prev;
   
   debugf("(reverseListyString) --- enter\n");
   if(listy == NULL || listy->head == NULL)
@@ -285,21 +285,21 @@ void reverseListyString(ListyString *listy)
     debugf("(reverseListyString) --- exit\n");
     return;
   }
-  
-  prev = listy->head;
-  prev->next = NULL;
-  head = listy->head->next;
-  next = head;
-  
-  while (head != NULL)
-  {
-    head = head->next;
-    next->next = prev;
-    prev = next;
-    next = head;
+
+	head = listy->head;
+	prev = NULL;
+	while (head != NULL)
+	{
+     next = head->next;
+     head->next = prev;
+		 prev = head;
+     head = next;
   }
-  
-  listy->head = head;
+	
+	// The new root of our linked list will be the last node that was
+	// processed, since head will now be NULL
+	listy->head = prev;
+
   debugf("(reverseListyString) --- exit\n");
 }
 
