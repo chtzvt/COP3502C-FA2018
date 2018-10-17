@@ -511,7 +511,7 @@ ListyNode *get_listy_tail(ListyString *list)
   tmp = list->head;
   
   // Verify bounds checking here
-  for (i = 1; i < list->length - 1; i++)
+  for (i = 1; i < list->length; i++)
   {
     tmp = tmp->next;
     
@@ -523,7 +523,7 @@ ListyNode *get_listy_tail(ListyString *list)
     }
   }
   
-  debugf("(get_listy_tail) [%p] Triumphantly returning the address of a new ListyNode\n", tmp);
+  debugf("(get_listy_tail) [%p] Triumphantly returning the address of the tail ListyNode\n", tmp);
   debugf("(get_listy_tail) --- exit\n");
   return tmp;
 }
