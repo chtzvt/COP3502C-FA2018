@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <string.h>
 #include "ListyString.h"
 
 #define DEBUG
@@ -38,7 +39,7 @@ int main(int argc, char **argv)
 int processInputFile(char *filename)
 {
   FILE *ifp;
-  char raw_string[1024], cmd, key;
+  char *raw_string, cmd, key;
   ListyString *listy;
   
   ifp = fopen(filename, "r");
@@ -49,7 +50,8 @@ int processInputFile(char *filename)
     return 1;
   }
 	
-	fscanf(ifp, "%s", &raw_string);
+	raw_string = malloc((sizeof(char) * 1024) + 1);
+	fscanf(ifp, "%s", raw_string);
 	
 	listy = createListyString(raw_string);
 	
@@ -67,34 +69,43 @@ int processInputFile(char *filename)
 		{
 			case '@':
 				fscanf(ifp, "%c", &key);
-				fscanf(ifp, "%s", &raw_string);
+				fscanf(ifp, "%c", &key);
+				fscanf(ifp, "%s", raw_string);
+				debugf("(processInputFile) Read command: %c,%c,%s [replace]\n", cmd, key, raw_string);
 				replaceChar(listy, key, raw_string);
 				break;
 			
-				case '+':
-					fscanf(ifp, "%s", &raw_string);
-					listyCat(listy, raw_string);
-					break;
+			case '+':
+				fscanf(ifp, "%s", raw_string);
+				debugf("(processInputFile) Read command: %c,%s [concatenate]\n", cmd, raw_string);
+				listyCat(listy, raw_string);
+				break;
+			
+			case '-':
+				fscanf(ifp, "%c", &key);
+				fscanf(ifp, "%c", &key);
+				debugf("(processInputFile) Read command: %c,%c [delete]\n", cmd, key);
+				replaceChar(listy, key, "");
+				break;
 				
-				case '-':
-					fscanf(ifp, "%c", &key);
-					replaceChar(listy, key, "");
-					break;
-					
-				case '~':
-					reverseListyString(listy);
-					break;
-					
-				case '?':
-					printf("%d\n", listyLength(listy));
-					break;
-					
-				case '!':
-					printListyString(listy);
-					break;
+			case '~':
+				debugf("(processInputFile) Read command: %c [reverse]\n", cmd);
+				reverseListyString(listy);
+				break;
+				
+			case '?':
+				debugf("(processInputFile) Read command: %c [print length]\n", cmd);
+				printf("%d\n", listyLength(listy));
+				break;
+				
+			case '!':
+				debugf("(processInputFile) Read command: %c [print listystring]\n", cmd);
+				printListyString(listy);
+				break;
 		}
 	}
   
+	free(raw_string);
   return 0;
 }
 
@@ -259,6 +270,7 @@ void replaceChar(ListyString *listy, char key, char *str)
           debugf("(replaceChar) Connecting node %c@%p to NULL to create a new end of our list (DELETE, case C)\n", tmp_prev->data, tmp_prev);
           tmp_prev->next = NULL;
           free(tmp_head);
+					tmp_head = tmp_prev;
         }
         
         listy->length -= 1;
@@ -508,8 +520,7 @@ char *listy_to_string(ListyString *list)
     
     if (tmp == NULL)
     {
-      debugf("(listy_to_string) [NULL] ERROR: Recieved malformed listy string- encountered a NULL node at index %d\n", i);
-      debugf("(listy_to_string) --- exit\n");
+      debugf("(listy_to_string) Encountered a NULL node at index %d (loop stopping)\n", i);
       break;
     }
   }
