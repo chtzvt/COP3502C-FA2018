@@ -277,6 +277,7 @@ void replaceChar(ListyString *listy, char key, char *str)
 		{
       debugf("(replaceChar) Found key %c in string!\n", key);
       
+			// All cases in here are for DELETING characters from our listystring
       if (str_len == 0 || str == NULL)
       {
         debugf("(replaceChar) Provided string is NULL, so we'll delete this node\n");
@@ -293,10 +294,8 @@ void replaceChar(ListyString *listy, char key, char *str)
         if (tmp_prev == NULL && tmp_head->next != NULL)
         {
           debugf("(replaceChar) Connecting original HEAD node %c@%p to new HEAD %c@%p (DELETE, case B)\n", listy->head->data, listy->head, tmp_head->data, tmp_head);
-					//tmp_prev = listy->head;
 					listy->head = listy->head->next;
 					tmp_head = listy->head;
-					//free(tmp_head);
 					tmp_prev = NULL;
 					continue;
         }
@@ -314,12 +313,14 @@ void replaceChar(ListyString *listy, char key, char *str)
       }
       else
       {
+				// Everything in here does a proper replacement
         debugf("(replaceChar) Will now replace '%c' with '%s'\n", key, str);
         tmp_string = createListyString(str);
         tmp_string_tail = get_listy_tail(tmp_string);
         debugf("(replaceChar) Now have a new ListyString of length %d, and its tail pointer: %p\n", tmp_string->length, tmp_string_tail);
         debugf("(replaceChar) (tmp_prev == NULL): %d (tmp_head->next == NULL): %d \n", (tmp_prev == NULL), (tmp_head->next == NULL));
         
+				// If the node in question is between two other nodes
         if (tmp_prev != NULL && tmp_head->next != NULL)
         {
           debugf("(replaceChar) Connecting node %c@%p to %c@%p (case A)\n", tmp_prev->data, tmp_prev,  tmp_string->head->data, tmp_string->head);
@@ -329,6 +330,7 @@ void replaceChar(ListyString *listy, char key, char *str)
           tmp_head = tmp_string_tail;
         }
         
+				// If the node is the first node in the linked list
         if (tmp_prev == NULL && tmp_head->next != NULL)
         {
           debugf("(replaceChar) Connecting original HEAD node %c@%p to new HEAD %c@%p (case B)\n", listy->head->data, listy->head, tmp_string->head->data, tmp_string->head);
@@ -338,6 +340,7 @@ void replaceChar(ListyString *listy, char key, char *str)
           tmp_head = tmp_string_tail;
         }
         
+				// If the node is the last node in the linked list
         if (tmp_prev != NULL && tmp_head->next == NULL)
         {
           debugf("(replaceChar) Connecting node %c@%p to %c@%p (case C)\n", tmp_prev->data, tmp_prev, tmp_string_tail->data, tmp_string_tail);
@@ -347,6 +350,7 @@ void replaceChar(ListyString *listy, char key, char *str)
 					tmp_string_tail->next = NULL;
         }
 
+				// If the node is the *only* node in the linked list
 				if (tmp_prev == NULL && tmp_head->next == NULL)
         {
           debugf("(replaceChar) Replacing original HEAD node %c@%p with new HEAD %c@%p (case D)\n", listy->head->data, listy->head, tmp_string->head->data, tmp_string->head);
@@ -356,6 +360,7 @@ void replaceChar(ListyString *listy, char key, char *str)
 					tmp_string_tail->next = NULL;
         }
         
+				// Whenever we append to the list, increment the length property accordingly
         listy->length += (str_len - 1);
       }
     }
@@ -431,6 +436,7 @@ ListyString *listyCat(ListyString *listy, char *str)
 	if(str != NULL)
 		str_len = strlen(str);
 	
+	// Only try to append to the linked list if we have some data in the string
 	if (str_len > 0)
 	{
 		str_len = strlen(str);
@@ -555,7 +561,7 @@ char *listy_to_string(ListyString *list)
   }
   
   tmp = list->head;
-  str = malloc(sizeof(char) * (list->length+1));
+  str = malloc(sizeof(char) * (list->length-1));
   
   // May need to implement proper bounds checking for the very last node,
   // which will not have a next pointer.
@@ -566,6 +572,7 @@ char *listy_to_string(ListyString *list)
     
     if (tmp == NULL)
     {
+			str[i+1] = '\0';
       debugf("(listy_to_string) Encountered a NULL node at index %d (loop stopping)\n", i);
       break;
     }
