@@ -12,7 +12,7 @@
 #include <string.h>
 #include "ListyString.h"
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
   #define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__); fflush(stderr)
 #else
@@ -244,6 +244,8 @@ void replaceChar(ListyString *listy, char key, char *str)
 		
 		if (tmp_head == NULL)
 			break;
+			
+		debugf("(replaceChar) INFO: String state is \"%s\"\n", listy_to_string(listy));
 		
     if (tmp_head->data == key){
       debugf("(replaceChar) Found key %c in string!\n", key);
@@ -264,8 +266,10 @@ void replaceChar(ListyString *listy, char key, char *str)
         if (tmp_prev == NULL && tmp_head->next != NULL)
         {
           debugf("(replaceChar) Connecting original HEAD node %c@%p to new HEAD %c@%p (DELETE, case B)\n", listy->head->data, listy->head, tmp_head->data, tmp_head);
-          //free(listy->head);
-          listy->head = tmp_head;
+					free(listy->head);
+					tmp_prev = tmp_head;
+					tmp_head = tmp_head->next;
+					listy->head = tmp_head;
         }
         
         if (tmp_prev != NULL && tmp_head->next == NULL)
