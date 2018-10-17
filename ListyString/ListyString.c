@@ -22,7 +22,7 @@ void print_usage(char *name);
 char *listy_to_string(ListyString *list);
 ListyNode *get_listy_tail(ListyString *list);
 
-/*int main(int argc, char **argv)
+int main(int argc, char **argv)
 {
   // Handle cases where too few arguments are provided, so we don't segfault.
 	if (argc < 2 || argv[1] == NULL)
@@ -33,13 +33,12 @@ ListyNode *get_listy_tail(ListyString *list);
 	}
   
   return processInputFile(argv[1]);
-}*/
+}
 
 int processInputFile(char *filename)
 {
   FILE *ifp;
-  char *raw_string = NULL, *cmd;
-  int i;
+  char raw_string[1024], cmd, key;
   ListyString *listy;
   
   ifp = fopen(filename, "r");
@@ -49,16 +48,52 @@ int processInputFile(char *filename)
     debugf("(processInputFile) [1] Invalid filename provided.\n");
     return 1;
   }
-  
-  fscanf(ifp, "%s", raw_string);
-  
-  listy = createListyString(raw_string);
-  
-  if (listy == NULL)
-  {
-    debugf("(processInputFile) [1] ListyString creation failed.\n");
-    return 1;
-  }
+	
+	fscanf(ifp, "%s", &raw_string);
+	
+	listy = createListyString(raw_string);
+	
+	if (listy == NULL)
+	{
+		debugf("(processInputFile) [1] ListyString creation failed.\n");
+		return 1;
+	}
+	
+	while (!feof(ifp))
+	{
+		fscanf(ifp, "%c", &cmd);
+		
+		switch (cmd)
+		{
+			case '@':
+				fscanf(ifp, "%c", &key);
+				fscanf(ifp, "%s", &raw_string);
+				replaceChar(listy, key, raw_string);
+				break;
+			
+				case '+':
+					fscanf(ifp, "%s", &raw_string);
+					listyCat(listy, raw_string);
+					break;
+				
+				case '-':
+					fscanf(ifp, "%c", &key);
+					replaceChar(listy, key, "");
+					break;
+					
+				case '~':
+					reverseListyString(listy);
+					break;
+					
+				case '?':
+					printf("%d\n", listyLength(listy));
+					break;
+					
+				case '!':
+					printListyString(listy);
+					break;
+		}
+	}
   
   return 0;
 }
