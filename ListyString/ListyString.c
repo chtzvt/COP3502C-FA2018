@@ -1,9 +1,26 @@
+// Charlton Trezevant
+// Sean Szumlanski
+// COP 3502C
+// Assignment #3 - ListyString.c
+
 /*
-  Charlton Trezevant
-  Sean Szumlanski
-  COP 3502C
-  
-  Assignment #3 - ListyString.c
+	A few notes for the Grader,
+	
+	- If you like, I can try to write a proper command to strip out Atom's space
+	indentation and replace it with actual tabs. I didn't have enough time to figure
+	that out this time around, because by the time I discovered how helpfully Atom had
+  indented my lines for me, I had already written the majority of this code.
+	
+	- Secondly, if there's any interest in my nifty debugf macro, I'd be more than happy to
+	share it with others. I've built in full support for variadic arguments, so it'll
+	work just like printf (*and* flush your output after each call). Additionally, it
+	doesn't affect Szum's test cases (since all of its output is sent to stderr).
+	
+	- Thirdly, ever since I picked up Go I've gotten somewhat tired of manually enforcing
+	style restrictions, so if you could ask whoever's in charge of Eustis to please install
+	clang-format utility, I can help get Szum's styleguide distilled into a format file so
+	that all of the styling and refactoring can be automatically performed. Incidentally,
+	this would also take care of any reformatting required for Atom or other text editors.
 */
 
 #include <stdio.h>
@@ -12,13 +29,14 @@
 #include <string.h>
 #include "ListyString.h"
 
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
   #define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__); fflush(stderr)
 #else
   #define debugf(fmt, ...) ((void)0)
 #endif
 
+// Helper functions
 void print_usage(char *name);
 char *listy_to_string(ListyString *list);
 ListyNode *get_listy_tail(ListyString *list);
@@ -55,12 +73,14 @@ int processInputFile(char *filename)
 	
 	listy = createListyString(raw_string);
 	
+	// Handle the odd, unlikely failure case here and there
 	if (listy == NULL)
 	{
 		debugf("(processInputFile) [1] ListyString creation failed.\n");
 		return 1;
 	}
 	
+	// Our main file processing loop, which breaks at EOF
 	while (!feof(ifp))
 	{
 		fscanf(ifp, "%c", &cmd);
@@ -122,7 +142,8 @@ ListyString *createListyString(char *str)
   list->head = NULL;
   debugf("(createListyString) malloc'd %d for a ListyString of length %d\n", (int)(sizeof(ListyString)), list->length);
   
-  if (str == NULL){
+  if (str == NULL)
+	{
     debugf("(createListyString) [empty list] Recieved a NULL input string\n");
     debugf("(createListyString) --- exit\n");
     return list;
@@ -130,14 +151,17 @@ ListyString *createListyString(char *str)
   
   list->length = strlen(str);
   
-  // May want to double check on how to handle strlen of 0 here.
-  if (list->length < 1){
+	// Return a NULL-initialized ListyString for an empty input string
+  if (list->length < 1)
+	{
     debugf("(createListyString) [empty list] Recieved an input string with a length of 0\n");
     debugf("(createListyString) --- exit\n");
     return list;
   }
 
   debugf("(createListyString) LENGTH UPDATE: Populating ListyString with %d nodes\n", list->length);
+	
+	// If we have a sizeable enough input string, we can populate the ListyString with some nodes.
   prev_node = malloc(sizeof(ListyNode));
   list->head = prev_node;
   list->head->data = str[0];
@@ -167,6 +191,7 @@ ListyString *destroyListyString(ListyString *listy)
   
   debugf("(destroyListyString) --- enter\n");
   
+	// Return early if we're passed a NULL ListyString pointer
   if (listy == NULL)
   {
     debugf("(destroyListyString) [NULL] Terminating early due to NULL arguments\n");
@@ -174,6 +199,7 @@ ListyString *destroyListyString(ListyString *listy)
     return NULL;
   }
 
+ // Or, if we're passed a ListyString with a NULL head, we don't need to bother freeing any nodes.
  if (listy->head == NULL)
  {
    free(listy);
@@ -207,7 +233,7 @@ ListyString *cloneListyString(ListyString *listy)
   debugf("(cloneListyString) --- enter\n");
   if (listy == NULL)
   {
-    debugf("(cloneListyString) [NULL] ERROR: Terminating early due to NULL pointer!\n");
+    debugf("(cloneListyString) [NULL] ERROR: Terminating early due to NULL listystring pointer!\n");
     debugf("(cloneListyString) --- exit\n");
     return NULL;
   }
@@ -243,11 +269,12 @@ void replaceChar(ListyString *listy, char key, char *str)
   {
 		
 		if (tmp_head == NULL)
-			break;
+			continue;
 			
 		debugf("(replaceChar) INFO: String state is \"%s\"\n", listy_to_string(listy));
 		
-    if (tmp_head->data == key){
+    if (tmp_head->data == key)
+		{
       debugf("(replaceChar) Found key %c in string!\n", key);
       
       if (str_len == 0 || str == NULL)
@@ -266,10 +293,12 @@ void replaceChar(ListyString *listy, char key, char *str)
         if (tmp_prev == NULL && tmp_head->next != NULL)
         {
           debugf("(replaceChar) Connecting original HEAD node %c@%p to new HEAD %c@%p (DELETE, case B)\n", listy->head->data, listy->head, tmp_head->data, tmp_head);
-					free(listy->head);
-					tmp_prev = tmp_head;
-					tmp_head = tmp_head->next;
-					listy->head = tmp_head;
+					//tmp_prev = listy->head;
+					listy->head = listy->head->next;
+					tmp_head = listy->head;
+					//free(tmp_head);
+					tmp_prev = NULL;
+					continue;
         }
         
         if (tmp_prev != NULL && tmp_head->next == NULL)
@@ -315,6 +344,15 @@ void replaceChar(ListyString *listy, char key, char *str)
           tmp_prev->next = tmp_string->head;
           free(tmp_head);
           tmp_head->next = tmp_string_tail;
+					tmp_string_tail->next = NULL;
+        }
+
+				if (tmp_prev == NULL && tmp_head->next == NULL)
+        {
+          debugf("(replaceChar) Replacing original HEAD node %c@%p with new HEAD %c@%p (case D)\n", listy->head->data, listy->head, tmp_string->head->data, tmp_string->head);
+        	free(listy->head);
+					listy->head = tmp_string->head;
+					tmp_head = listy->head;
 					tmp_string_tail->next = NULL;
         }
         
