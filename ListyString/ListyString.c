@@ -11,7 +11,7 @@
 #include <strings.h>
 #include "ListyString.h"
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
   #define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__); fflush(stderr)
 #else
@@ -305,40 +305,51 @@ void reverseListyString(ListyString *listy)
 
 ListyString *listyCat(ListyString *listy, char *str)
 {
-  int str_len, i;
+  int str_len;
   ListyNode *tail;
+	ListyString *tmp_string;
   
   debugf("(listyCat) --- enter\n");
-  if(listy == NULL && str == NULL)
-  {
-    debugf("(listyCat) [NULL] Called with NULL arguments\n");
-    debugf("(listyCat) --- exit\n");
-    return NULL;
-  }
+	debugf("(listyCat) (listy == NULL): %d (str == NULL): %d\n", (listy == NULL), (str == NULL));
+	
+	if(listy == NULL && str == NULL)
+	{
+		debugf("(listyCat) [NULL] Called with NULL arguments\n");
+		debugf("(listyCat) --- exit\n");
+		return NULL;
+	}
+	
+	if (str != NULL)
+		str_len = strlen(str);
+	else
+		str_len = -1;
+	
+	debugf("(listyCat) Str length: %d\n", str_len);
+	
+	if(listy == NULL && str_len > 0)
+	{
+		debugf("(listyCat) [createListyString()] Called with NULL ListyString and non-NULL string\n");
+		debugf("(listyCat) --- exit\n");
+		return createListyString(str);
+	}
   
-  if(listy == NULL && str != NULL)
+  if(listy == NULL && str_len == 0)
   {
-    debugf("(listyCat) [createListyString()] Called with NULL ListyString and non-NULL string\n");
+    debugf("(listyCat) [ListyString] Called with NULL ListyString and non-NULL, empty string\n");
     debugf("(listyCat) --- exit\n");
     return createListyString(str);
   }
   
-  if(str == NULL)
-  {
-    debugf("(listyCat) [ListyString] Called with non-NULL ListyString and NULL string\n");
-    debugf("(listyCat) --- exit\n");
-    return listy;
-  }
-  
   tail = get_listy_tail(listy);
-  str_len = strlen(str);
-  
-  for (i = 0; i < str_len; i++)
-  {
-    tail->next = malloc(sizeof(ListyNode));
-    tail->next->data = str[i];
-    tail = tail->next;
-  }
+	tmp_string = createListyString(str);
+
+	if (tail == NULL)
+		listy->head = tmp_string->head;
+	else
+		tail->next = tmp_string->head;
+
+	free(tmp_string);
+	listy->length += str_len;
   
   debugf("(listyCat) [ListyString] Triumphantly returning our concatenated ListyString\n");
   debugf("(listyCat) --- exit\n");
@@ -480,13 +491,21 @@ ListyNode *get_listy_tail(ListyString *list)
   int i;
   
   debugf("(get_listy_tail) --- enter\n");
-  if (list == NULL || list->head == NULL)
+	
+  if (list == NULL)
   {
     debugf("(get_listy_tail) [NULL] ERROR: Terminating early due to NULL pointer!\n");
     debugf("(get_listy_tail) --- exit\n");
     return NULL;
   }
   
+	if (list->head == NULL)
+	{
+		debugf("(get_listy_tail) [list->head] Triumphantly returning HEAD node of ListyString\n");
+		debugf("(get_listy_tail) --- exit\n");
+		return list->head;
+	}
+	
   tmp = list->head;
   
   // Verify bounds checking here
