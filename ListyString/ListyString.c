@@ -305,7 +305,7 @@ void reverseListyString(ListyString *listy)
 
 ListyString *listyCat(ListyString *listy, char *str)
 {
-  int str_len;
+  int str_len = 0;
   ListyNode *tail;
 	ListyString *tmp_string;
   
@@ -318,12 +318,7 @@ ListyString *listyCat(ListyString *listy, char *str)
 		debugf("(listyCat) --- exit\n");
 		return NULL;
 	}
-	
-	if (str != NULL)
-		str_len = strlen(str);
-	else
-		str_len = -1;
-	
+
 	debugf("(listyCat) Str length: %d\n", str_len);
 	
 	if(listy == NULL && str_len > 0)
@@ -340,17 +335,21 @@ ListyString *listyCat(ListyString *listy, char *str)
     return createListyString(str);
   }
   
-  tail = get_listy_tail(listy);
-	tmp_string = createListyString(str);
-
-	if (tail == NULL)
-		listy->head = tmp_string->head;
-	else
-		tail->next = tmp_string->head;
-
-	free(tmp_string);
-	listy->length += str_len;
-  
+	if (str != NULL && str_len > 0)
+	{
+		str_len = strlen(str);
+  	tail = get_listy_tail(listy);
+		tmp_string = createListyString(str);
+		
+		if (tail == NULL)
+			listy->head = tmp_string->head;
+		else
+			tail->next = tmp_string->head;
+			
+			free(tmp_string);
+			listy->length += str_len;
+  }
+	
   debugf("(listyCat) [ListyString] Triumphantly returning our concatenated ListyString\n");
   debugf("(listyCat) --- exit\n");
   return listy;
