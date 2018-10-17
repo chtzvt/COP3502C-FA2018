@@ -335,7 +335,10 @@ ListyString *listyCat(ListyString *listy, char *str)
     return createListyString(str);
   }
   
-	if (str != NULL && str_len > 0)
+	if(str != NULL)
+		str_len = strlen(str);
+	
+	if (str_len > 0)
 	{
 		str_len = strlen(str);
   	tail = get_listy_tail(listy);
